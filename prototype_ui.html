@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Energy Nodes - Level Indicator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 100%);
+      color: #e2e8f0;
+    }
+
+    .demo-container {
+      width: 100%;
+      max-width: 800px;
+      padding: 40px;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .demo-title {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* --- Cosmic Energy Nodes CSS --- */
+
+    .level-indicator {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+
+    /* The track background */
+    .level-indicator__track {
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      right: 24px;
+      height: 4px;
+      transform: translateY(-50%);
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 4px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+      z-index: 0;
+    }
+
+    /* The glowing progress line */
+    .level-indicator__progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%; /* Demo value: 2 levels completed */
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(129, 140, 248, 0.6), 0 0 20px rgba(192, 132, 252, 0.4);
+      transition: width 0.5s ease-out;
+    }
+
+    /* Each Node (Button) */
+    .level-node {
+      position: relative;
+      z-index: 1;
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.8);
+      color: #64748b;
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 0 2px rgba(51, 65, 85, 0.6), 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Hover effect for all states */
+    .level-node:hover {
+      transform: translateY(-2px);
+      box-shadow: inset 0 0 0 2px rgba(148, 163, 184, 0.4), 0 8px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* State: Completed (Past Levels) */
+    .level-node--completed {
+      background: rgba(30, 58, 138, 0.3);
+      color: #bae6fd;
+      text-shadow: 0 0 8px rgba(186, 230, 253, 0.8);
+      box-shadow: inset 0 0 0 2px #38bdf8, 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+
+    .level-node--completed:hover {
+      box-shadow: inset 0 0 0 2px #7dd3fc, 0 0 20px rgba(56, 189, 248, 0.6);
+    }
+
+    /* State: Active (Current Level) */
+    .level-node--active {
+      background: radial-gradient(circle at center, rgba(124, 58, 237, 0.4) 0%, rgba(15, 23, 42, 0.8) 70%);
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 0 0 2px #c084fc, 0 0 20px rgba(192, 132, 252, 0.5), 0 0 40px rgba(124, 58, 237, 0.3);
+      transform: scale(1.1);
+    }
+
+    .level-node--active::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(192, 132, 252, 0.5);
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .level-node--active:hover {
+      transform: scale(1.15) translateY(-2px);
+      box-shadow: inset 0 0 0 2px #e879f9, 0 0 25px rgba(192, 132, 252, 0.7), 0 0 50px rgba(124, 58, 237, 0.5);
+    }
+
+    /* Locked states don't have special classes, they just use `.level-node` base styling */
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    /* Interactive UI controls for the demo */
+    .controls {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .control-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-container">
+    <div class="demo-title">Evolution Synchronization</div>
+    
+    <div class="level-indicator">
+      <div class="level-indicator__track">
+        <div class="level-indicator__progress" id="progress-bar"></div>
+      </div>
+
+      <button class="level-node level-node--completed" onclick="setLevel(1)">1</button>
+      <button class="level-node level-node--completed" onclick="setLevel(2)">2</button>
+      <button class="level-node level-node--active" onclick="setLevel(3)">3</button>
+      <button class="level-node" onclick="setLevel(4)">4</button>
+      <button class="level-node" onclick="setLevel(5)">5</button>
+      <button class="level-node" onclick="setLevel(6)">6</button>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn" onclick="prevLevel()">Prev Level</button>
+      <button class="control-btn" onclick="nextLevel()">Next Level</button>
+    </div>
+  </div>
+
+  <script>
+    let currentLevel = 3;
+    const totalLevels = 6;
+    const nodes = document.querySelectorAll('.level-node');
+    const progressBar = document.getElementById('progress-bar');
+
+    function updateUI() {
+      // Update progress bar width
+      // Logic for spacing: 5 segments between 6 dots.
+      const percentage = ((currentLevel - 1) / (totalLevels - 1)) * 100;
+      progressBar.style.width = `${percentage}%`;
+
+      // Update Node states
+      nodes.forEach((node, index) => {
+        const level = index + 1;
+        
+        // Clear all states
+        node.classList.remove('level-node--completed', 'level-node--active');
+        
+        if (level < currentLevel) {
+          node.classList.add('level-node--completed');
+        } else if (level === currentLevel) {
+          node.classList.add('level-node--active');
+        }
+      });
+    }
+
+    function setLevel(level) {
+      if(level >= 1 && level <= totalLevels) {
+        currentLevel = level;
+        updateUI();
+      }
+    }
+
+    function nextLevel() {
+      if (currentLevel < totalLevels) {
+        setLevel(currentLevel + 1);
+      }
+    }
+
+    function prevLevel() {
+      if (currentLevel > 1) {
+        setLevel(currentLevel - 1);
+      }
+    }
+  </script>
+</body>
+</html>

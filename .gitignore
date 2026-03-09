@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment (do not commit API keys)
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+*.log
