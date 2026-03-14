@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { TwinSelector } from "./TwinSelector";
 import { TwinChat } from "./TwinChat";
+import { loadSessionMemory, getStoredGeminiApiKey, getStoredOpenAIApiKey, recomputeCognitiveProfile } from "../api/twinApi";
 
 type ChatMessage = {
   id: string;
@@ -18,18 +19,96 @@ interface EvolutionChatProps {
 }
 
 export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twin-001", onNavigateToPresets }) => {
+  // ── 唤醒并连接：一次性读取 6 关人格 + 记忆碎片 ──
+  const [sessionMemory, setSessionMemory] = useState<string | null>(null);
+  const [memoryLoading, setMemoryLoading] = useState(false);
+  const [awakenNote, setAwakenNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const hasLlmKey = !!getStoredGeminiApiKey() || !!getStoredOpenAIApiKey();
+  const isAwakened = sessionMemory !== null;
+
+  const handleAwaken = async () => {
+    setMemoryLoading(true);
+    setAwakenNote(null);
+    try {
+      const ctx = await loadSessionMemory({ user_id: twinId });
+      setSessionMemory(ctx || "");
+      // 每次唤醒时顺便重算一次认知维度矩阵
+      recomputeCognitiveProfile();
+      const segments = ctx.split("\n\n").filter(Boolean);
+      const levelCount = segments.filter(s => s.startsWith("[人格") || s.startsWith("[灵魂拷贝")).length;
+      const vaultCount = segments.filter(s => s.startsWith("[记忆碎片")).length;
+      setAwakenNote(ctx
+        ? { ok: true, text: `已读取 ${levelCount} 段人格 · ${vaultCount} 条记忆碎片` }
+        : { ok: false, text: "未找到记忆数据，请先填写灵魂拷贝或添加记忆碎片" }
+      );
+    } catch {
+      setSessionMemory("");
+      setAwakenNote({ ok: false, text: "唤醒失败，请检查网络或 EverMemOS API Key" });
+    } finally {
+      setMemoryLoading(false);
+    }
+  };
   const [activeTwin, setActiveTwin] = useState("t-001");
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
 
-  // Analytics State
-  const [syncRate, setSyncRate] = useState(87);
+  // 历史会话：按分身 ID 持久化在 localStorage
+  type ChatSession = {
+    id: string;
+    title: string;
+    time: string;
+    preview: string;
+    messages: ChatMessage[];
+  };
+
+  const historyKeyForTwin = (twin: string) => `twin_chat_history_${twin}`;
+
+  const loadHistory = (twin: string): ChatSession[] => {
+    try {
+      const raw = window.localStorage.getItem(historyKeyForTwin(twin));
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as ChatSession[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveHistory = (twin: string, list: ChatSession[]) => {
+    try {
+      window.localStorage.setItem(historyKeyForTwin(twin), JSON.stringify(list));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Analytics State（与 TwinStudio Dashboard 共享），默认 55%
+  const loadInitialSyncRate = () => {
+    try {
+      const raw = window.localStorage.getItem("twin_sync_rate");
+      const n = raw != null ? Number(raw) : NaN;
+      if (!Number.isNaN(n) && n >= 0 && n <= 100) return n;
+    } catch {/* ignore */}
+    return 55;
+  };
+  const [syncRate, setSyncRate] = useState(loadInitialSyncRate);
   const [floatingText, setFloatingText] = useState<{ id: number, x: number, y: number, text: string } | null>(null);
   const [leftPaneMode, setLeftPaneMode] = useState<'analytics' | 'history'>('analytics');
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
+  const [historySessions, setHistorySessions] = useState<ChatSession[]>(() => loadHistory(activeTwin));
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  /** 仅在新对话按钮点击时递增，用于主聊天 key，避免首句发送后 key 变化导致重挂载清空内容 */
+  const [mainChatResetKey, setMainChatResetKey] = useState(0);
   let floatIdCounter = 0;
+
+  // 持久化同步率，供 TwinStudio 读取
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("twin_sync_rate", String(syncRate));
+    } catch {/* ignore */}
+  }, [syncRate]);
 
   // Consultant Dock State (Compact)
   const presetConsultants = [
@@ -41,19 +120,70 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
   const [atQuery, setAtQuery] = useState("");
   const [activeConsultant, setActiveConsultant] = useState<string | null>(null);
 
-  // Mock History Data
-  const historySessionsByTwin: Record<string, any[]> = {
-    't-001': [
-      { id: 'h1', title: '职场高压会议演练', time: '昨天 14:30', preview: '探讨了面对激进提问时的防御性话术...', keywords: [{ word: '边界感', weight: 9 }, { word: '情绪稳定', weight: 7 }, { word: '防御性话术', weight: 8 }, { word: '职场PUA', weight: 5 }, { word: '结构化思维', weight: 6 }] },
-      { id: 'h2', title: '年度OKRs汇报对齐', time: '上周一 09:15', preview: '优化了向上汇报时的STAR原则表达...', keywords: [{ word: '向上管理', weight: 9 }, { word: '数据导向', weight: 8 }, { word: '核心目标', weight: 7 }, { word: '资源盘点', weight: 6 }, { word: '复盘逻辑', weight: 8 }] },
-    ],
-    't-002': [
-      { id: 'h3', title: '周末烧烤派对吐槽', time: '前天 19:00', preview: '分享了腌制排骨的独家配方和精酿啤酒...', keywords: [{ word: '精酿啤酒', weight: 8 }, { word: '腌制配方', weight: 9 }, { word: '松弛感', weight: 7 }, { word: '社交能量', weight: 6 }, { word: '重度烘焙', weight: 5 }] },
-      { id: 'h4', title: '《沙丘2》观后感交流', time: '上周六 23:15', preview: '关于科幻史诗中的宿命论与宗教隐喻...', keywords: [{ word: '宿命论', weight: 9 }, { word: '姐妹会', weight: 8 }, { word: '香料视觉', weight: 7 }, { word: '弗雷曼人', weight: 6 }, { word: '救世主困境', weight: 9 }] },
-    ]
-  };
+  // 当切换分身时，重新加载该分身的历史会话并重置主聊天
+  useEffect(() => {
+    setHistorySessions(loadHistory(activeTwin));
+    setSelectedHistoryId(null);
+    setCurrentSessionId(null);
+    setMainChatResetKey((k) => k + 1);
+  }, [activeTwin]);
 
-  const historySessions = historySessionsByTwin[activeTwin] || historySessionsByTwin['t-001'];
+  // 分身对话（TwinChat）消息变化时同步到本组件，用于历史记录
+  const handleTwinChatMessagesChange = useCallback((msgs: { id: string; role: "user" | "assistant"; content: string }[]) => {
+    const converted: ChatMessage[] = msgs.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      feedback: null,
+    }));
+    setMessages(converted);
+  }, []);
+
+  // 在历史会话中继续聊天时，更新该条会话的消息并持久化
+  const handleHistorySessionMessagesChange = useCallback(
+    (sessionId: string, msgs: { id: string; role: "user" | "assistant"; content: string }[]) => {
+      const converted: ChatMessage[] = msgs.map((m) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        feedback: null,
+      }));
+      const firstUser = converted.find((m) => m.role === "user");
+      const lastAssistant = [...converted].reverse().find((m) => m.role === "assistant");
+    const title = (firstUser?.content || "历史会话").slice(0, 16);
+    const preview = (lastAssistant?.content || firstUser?.content || "").slice(0, 28);
+      setHistorySessions((prev) => {
+        const next = prev.map((s) =>
+          s.id === sessionId ? { ...s, title, preview, messages: converted } : s
+        );
+        saveHistory(activeTwin, next);
+        return next;
+      });
+    },
+    [activeTwin]
+  );
+
+  // 一旦有消息且当前没有会话 id，立即创建一条历史会话（这样历史聊天里会立刻出现）
+  useEffect(() => {
+    if (messages.length === 0 || currentSessionId !== null) return;
+    const sessionId = Date.now().toString();
+    setCurrentSessionId(sessionId);
+    const firstUser = messages.find((m) => m.role === "user");
+    const title = (firstUser?.content || "新会话").slice(0, 16);
+    const preview = (firstUser?.content || "").slice(0, 28);
+    const newSession: ChatSession = {
+      id: sessionId,
+      time: new Date().toLocaleString(),
+      title,
+      preview,
+      messages: [...messages],
+    };
+    setHistorySessions((prev) => {
+      const updated = [newSession, ...prev];
+      saveHistory(activeTwin, updated);
+      return updated;
+    });
+  }, [messages, currentSessionId, activeTwin]);
 
   // Mock Logs Data
   const analyticsLogsByTwin: Record<string, any[]> = {
@@ -92,7 +222,24 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
           : "嘿！周末过得爽吗？我看到你拍的那些滑雪照片了！"
       });
 
+      const sessionId = Date.now().toString();
       setMessages(nextMessages);
+      setCurrentSessionId(sessionId);
+
+      const newSession: ChatSession = {
+        id: sessionId,
+        time: new Date().toLocaleString(),
+        title: activeTwin === "t-001" ? "新会话：工作模式" : "新会话",
+        preview: "",
+        messages: nextMessages,
+      };
+
+      setHistorySessions((prev) => {
+        const updated = [newSession, ...prev];
+        saveHistory(activeTwin, updated);
+        return updated;
+      });
+
       setStarted(true);
       setLoading(false);
     }, 1500);
@@ -198,19 +345,16 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
   const handleAbsorb = (msgId: string, e: React.MouseEvent) => {
     // 1. Mark as absorbed visually (optional UI state, skipping for brevity)
 
-    // 2. Trigger absorption floating animation
+    // 2. Trigger absorption floating animation（仅做视觉反馈，不改动大脑同步率）
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     setFloatingText({
       id: floatIdCounter++,
       x: rect.left - 40,
       y: rect.top - 40,
-      text: "✨ 吸收专家思维 +5% Sync"
+      text: "✨ 已吸收专家思维"
     });
 
     setTimeout(() => setFloatingText(null), 1500);
-
-    // 3. Update Sync Rate dramatically
-    setSyncRate(prev => Math.min(prev + 5, 100));
   };
 
   const handleFeedback = (msgId: string, type: "up" | "down", e: React.MouseEvent) => {
@@ -249,8 +393,32 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
     setActiveConsultant(expertName);
   };
 
+  // 当当前会话有变更时，更新对应历史记录的 title / preview / messages 并持久化
+  useEffect(() => {
+    if (!currentSessionId || messages.length === 0) return;
+
+    const firstUser = messages.find((m) => m.role === "user");
+    const firstAssistant = messages.find((m) => m.role === "assistant");
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+
+    const titleBase = firstUser?.content || firstAssistant?.content || "历史会话";
+    const title = titleBase.slice(0, 16);
+    const previewBase = lastAssistant?.content || titleBase;
+    const preview = previewBase.slice(0, 28);
+
+    setHistorySessions((prev) => {
+      const next = prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, title, preview, messages: messages }
+          : s
+      );
+      saveHistory(activeTwin, next);
+      return next;
+    });
+  }, [messages, currentSessionId, activeTwin]);
+
   return (
-    <div className="evochat-container">
+    <div className="evochat-container" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 100px)', maxHeight: 'calc(100vh - 100px)', height: '100%', overflow: 'hidden' }}>
       {/* HEADER MANAGER */}
       <div className="analytics-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ marginBottom: '20px' }}>
@@ -258,42 +426,44 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
           <p className="analytics-subtitle" style={{ margin: 0 }}>边聊边调教：提供即时反馈（RLHF），提升数字大脑的同步率。</p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%' }}>
-          <TwinSelector
-            value={activeTwin}
-            onChange={(val) => {
-              setActiveTwin(val);
-              setStarted(false);
-              setMessages([]);
-              setSelectedHistoryId(null);
-              setSyncRate(val === 't-001' ? 88 : 87);
-            }}
-          />
-
-          <button
-            className="btn-launch-sandbox"
-            style={{
-              width: 'auto', padding: '10px 24px', fontSize: '15px', borderRadius: '20px',
-              background: started ? 'rgba(52, 211, 153, 0.2)' : 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
-              color: started ? '#34d399' : '#fff',
-              border: started ? '1px solid #34d399' : 'none',
-              boxShadow: started ? 'none' : '0 4px 15px rgba(52, 211, 153, 0.4)'
-            }}
-            onClick={handleStart}
-            disabled={loading}
-          >
-            {started ? "🔄 重新载入引擎" : "🚀 唤醒并连接"}
-          </button>
+        <div className="evochat-top-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <div className="evochat-top-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
+            <TwinSelector
+              value={activeTwin}
+              onChange={(val) => {
+                setActiveTwin(val);
+                setStarted(false);
+                setMessages([]);
+                setSelectedHistoryId(null);
+                setSyncRate(0);
+              }}
+            />
+            <div className="awaken-bar" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                type="button"
+                className={`btn-awaken${isAwakened ? " btn-awaken--active" : ""}`}
+                onClick={handleAwaken}
+                disabled={!hasLlmKey || memoryLoading}
+              >
+                {memoryLoading ? "读取记忆中…" : isAwakened ? "✅ 记忆已加载" : "⚡ 唤醒并连接"}
+              </button>
+              {awakenNote && (
+                <span className={`awaken-note${awakenNote.ok ? "" : " awaken-note--err"}`}>
+                  {awakenNote.text}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* MULTI PANE LAYOUT */}
-      <div className="evochat-layout" style={{ display: 'grid', gridTemplateColumns: `minmax(300px, 1fr) 2fr`, gap: '24px', height: 'calc(100vh - 200px)', transition: 'grid-template-columns 0.3s ease' }}>
+      <div className="evochat-layout" style={{ display: 'grid', gridTemplateColumns: `minmax(380px, 1fr) 2fr`, gridTemplateRows: '1fr', gap: '24px', flex: 1, minHeight: 0, overflow: 'hidden', transition: 'grid-template-columns 0.3s ease' }}>
 
-        {/* LEFT PANE: Analytics Dashboard & History & Consultant Dock */}
+        {/* LEFT PANE: Analytics/History */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', overflow: 'hidden' }}>
 
-          <div className="dashboard-card card--sync-rate" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+          <div className="dashboard-card card--sync-rate evochat-pane-sync" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
 
             {/* Sub-Tabs for Left Pane */}
             <div className="evochat-tabs">
@@ -312,10 +482,10 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
             </div>
 
             {leftPaneMode === 'analytics' ? (
-              <>
+              <div className="evochat-analytics-wrap" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'auto' }}>
                 <h3 className="card-title">大脑同步率 (Brain Sync Rate)</h3>
 
-                <div className="sync-ring-container" style={{ margin: '16px auto 30px' }}>
+                <div className="sync-ring-container" style={{ margin: '16px auto 10px' }}>
                   <svg viewBox="0 0 100 100" className="sync-ring-svg">
                     <circle className="sync-ring-bg" cx="50" cy="50" r="45" />
                     <circle
@@ -332,27 +502,27 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
                   </div>
                 </div>
 
-                <p className="sync-status" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <p className="sync-status" style={{ textAlign: 'center', marginBottom: '16px' }}>
                   {syncRate >= 90 ? "极高：简直就是世界上的另一个你" :
                     syncRate >= 80 ? "优秀：核心价值观认知高度一致" :
                       "普通：仍需更多日常对话反馈进行微调"}
                 </p>
-
-                <h3 className="card-title">近期神经活动</h3>
-                <ul className="log-list" style={{ overflowY: 'auto', flex: 1, paddingRight: '10px' }}>
-                  {analyticsLogs.map((log, idx) => (
-                    <li key={idx} className="log-item">
-                      <span className="log-time" style={{ color: idx === 0 ? '#34d399' : '#94a3b8' }}>{log.time}</span>
-                      <div className="log-content">
-                        <strong>{log.type}</strong>
-                        <p>{log.preview}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              </div>
             ) : (
-              <ul className="history-list">
+              <div className="evochat-history-wrap" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  className="evochat-history-new-btn"
+                  onClick={() => {
+                    setSelectedHistoryId(null);
+                    setCurrentSessionId(null);
+                    setMessages([]);
+                    setMainChatResetKey((k) => k + 1);
+                  }}
+                >
+                  ➕ 新对话
+                </button>
+                <ul className="history-list">
                 {historySessions.map(session => (
                   <li
                     key={session.id}
@@ -365,69 +535,70 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
-
-          {/* New Inline Consultant Dock (Separated Card) */}
-          <div className="dashboard-card consultant-dock-container" style={{ padding: '16px 20px', flexShrink: 0 }}>
-            <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px', fontWeight: 600 }}>辅助智囊团 (Consultants)</div>
-            <div className="consultant-dock-inline" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
-              {presetConsultants.map(c => (
-                <div
-                  key={c.id}
-                  className={`inline-dock-item ${activeConsultant === c.name ? 'active' : ''}`}
-                  onClick={() => handleConsultantClick(c.name)}
-                  title={`${c.name} - ${c.domain}`}
-                >
-                  <div className="inline-dock-avatar-wrapper">
-                    {activeConsultant === c.name && <div className="consultant-avatar-breathing"></div>}
-                    <img src={c.avatar} alt={c.name} className="inline-dock-avatar" />
-                  </div>
-                </div>
-              ))}
-              <div
-                className="inline-dock-item add-more"
-                onClick={() => { if (onNavigateToPresets) onNavigateToPresets() }}
-                title="招募专家"
-              >
-                <div className="inline-dock-avatar-wrapper">
-                  <div className="inline-dock-avatar add-btn">+</div>
-                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* MIDDLE PANE: Chat Interface */}
-        <div className="dashboard-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0', overflow: 'hidden' }}>
+        {/* MIDDLE PANE: Chat Interface（固定高度，历史/当前对话均不拉长） */}
+        <div className="dashboard-card evochat-pane-chat" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, maxHeight: '100%', padding: '0', overflow: 'hidden' }}>
 
-          {/* Chat Body or Keyword Cloud */}
-          {leftPaneMode === 'history' && selectedHistoryId ? (
-            <div className="keyword-cloud-container">
-              {historySessions.find(s => s.id === selectedHistoryId)?.keywords.map((kw: { word: string, weight: number }, idx: number) => {
-                // Calculate size based on weight (5-9 map to ~20px-60px)
-                const fontSize = `${(kw.weight - 3) * 8 + 12}px`;
-                // Assign a cyber color based on index
-                const colors = ['#34d399', '#6366f1', '#8b5cf6', '#22d3ee', '#f472b6'];
-                const color = colors[idx % colors.length];
+          {/* 如果在历史模式下选中了某条会话，则回放并可继续聊天；否则展示当前实时聊天（可新开一段） */}
+          {leftPaneMode === 'history' && selectedHistoryId ? (() => {
+            const selectedSession = historySessions.find((s) => s.id === selectedHistoryId);
+            const replayMessages =
+              selectedSession?.messages
+                ?.filter((m): m is ChatMessage => m.role === "user" || m.role === "assistant")
+                .map((m) => ({ id: m.id, role: m.role, content: m.content })) ?? [];
+            return (
+            <TwinChat
+              key={`history-${selectedHistoryId}`}
+              twinId={twinId}
+              sessionMemory={sessionMemory}
+              initialMessages={replayMessages}
+              sessionKey={selectedHistoryId}
+              onMessagesChange={(msgs) => handleHistorySessionMessagesChange(selectedHistoryId!, msgs)}
+              onFeedbackSync={(type, e) => {
+                // 历史回放模式下不再对同步率/反馈做修改
+              }}
+            />
+            );
+          })() : (
+            <TwinChat
+              key={`main-${mainChatResetKey}`}
+              twinId={twinId}
+              sessionMemory={sessionMemory}
+              onMessagesChange={handleTwinChatMessagesChange}
+              onFeedbackSync={(type, e) => {
+                // 在聊天区给分身点赞/点踩时，同步更新大脑同步率，并展示浮动提示
+                // 同时累积反馈统计，供认知维度矩阵微调使用
+                try {
+                  const raw = window.localStorage.getItem("twin_feedback_stats");
+                  const stats = raw ? JSON.parse(raw) as { upCount?: number; downCount?: number } : {};
+                  const up = Number(stats.upCount) || 0;
+                  const down = Number(stats.downCount) || 0;
+                  const next = {
+                    upCount: type === "up" ? up + 1 : up,
+                    downCount: type === "down" ? down + 1 : down,
+                  };
+                  window.localStorage.setItem("twin_feedback_stats", JSON.stringify(next));
+                } catch { /* ignore */ }
 
-                return (
-                  <div
-                    key={idx}
-                    className="keyword-item"
-                    style={{
-                      fontSize,
-                      color,
-                      opacity: kw.weight / 10 + 0.2
-                    }}
-                  >
-                    {kw.word}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <TwinChat twinId={twinId} />
+                if (type === "up") {
+                  const rect = (e.target as HTMLElement).getBoundingClientRect();
+                  setFloatingText({
+                    id: floatIdCounter++,
+                    x: rect.left,
+                    y: rect.top - 20,
+                    text: "+1% Sync",
+                  });
+                  setTimeout(() => setFloatingText(null), 1000);
+                  setSyncRate((prev) => Math.min(prev + 1, 100));
+                } else {
+                  setSyncRate((prev) => Math.max(prev - 1, 0));
+                }
+              }}
+            />
           )}
         </div>
 

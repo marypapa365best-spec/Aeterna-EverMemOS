@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+const TWIN_AVATAR_STORAGE_KEY = 'twin_avatar';
+
 interface Option {
     id: string;
     label: string;
@@ -7,8 +9,7 @@ interface Option {
 }
 
 export const TWIN_OPTIONS: Option[] = [
-    { id: 't-001', label: '工作分身 (Evermind)', avatar: '👩🏻‍💻' },
-    { id: 't-002', label: '娱乐分身 (Chill)', avatar: '😎' }
+    { id: 't-001', label: '数字永生分身', avatar: '🧬' }
 ];
 
 interface TwinSelectorProps {
@@ -18,11 +19,37 @@ interface TwinSelectorProps {
     options?: Option[];
 }
 
+function getDisplayAvatar(opt: Option, storedAvatar: string | null): string {
+    if (opt.id === 't-001' && storedAvatar) return storedAvatar;
+    return opt.avatar;
+}
+
+function AvatarCell({ avatar }: { avatar: string }) {
+    const isImg = avatar.startsWith('/') || avatar.startsWith('data:');
+    return (
+        <span className="gts-item-avatar">
+            {isImg ? (
+                <img src={avatar} alt="" className="gts-item-avatar-img" />
+            ) : (
+                <span className="gts-item-avatar-emoji">{avatar}</span>
+            )}
+        </span>
+    );
+}
+
 export const TwinSelector: React.FC<TwinSelectorProps> = ({ value, onChange, disabled, options = TWIN_OPTIONS }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [storedAvatar, setStoredAvatar] = useState<string | null>(() => {
+        try {
+            return window.localStorage.getItem(TWIN_AVATAR_STORAGE_KEY);
+        } catch {
+            return null;
+        }
+    });
 
     const selectedOpt = options.find(o => o.id === value) || options[0];
+    const displayAvatar = getDisplayAvatar(selectedOpt, storedAvatar);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -34,6 +61,13 @@ export const TwinSelector: React.FC<TwinSelectorProps> = ({ value, onChange, dis
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        try {
+            setStoredAvatar(window.localStorage.getItem(TWIN_AVATAR_STORAGE_KEY));
+        } catch { /* ignore */ }
+    }, [isOpen]);
+
     return (
         <div className={`google-twin-selector ${isOpen ? 'is-open' : ''} ${disabled ? 'is-disabled' : ''}`} ref={containerRef}>
             <div className="gts-inner">
@@ -43,9 +77,7 @@ export const TwinSelector: React.FC<TwinSelectorProps> = ({ value, onChange, dis
                     disabled={disabled}
                 >
                     <div className="gts-left">
-                        <span className="gts-item-avatar" style={{ fontSize: '20px', lineHeight: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px' }}>
-                            {selectedOpt.avatar}
-                        </span>
+                        <AvatarCell avatar={displayAvatar} />
                         <span className="gts-text">{selectedOpt.label}</span>
                     </div>
 
@@ -66,7 +98,7 @@ export const TwinSelector: React.FC<TwinSelectorProps> = ({ value, onChange, dis
                                     setIsOpen(false);
                                 }}
                             >
-                                <span className="gts-item-avatar" style={{ fontSize: '20px', lineHeight: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px' }}>{opt.avatar}</span>
+                                <AvatarCell avatar={getDisplayAvatar(opt, storedAvatar)} />
                                 <span className="gts-item-text">{opt.label}</span>
                             </div>
                         ))}

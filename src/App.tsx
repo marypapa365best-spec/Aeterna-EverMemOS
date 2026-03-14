@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PersonalityWizard } from "./components/PersonalityWizard";
 import { EvolutionChat } from "./components/EvolutionChat";
 import { MemoryVault } from "./components/MemoryVault";
 import { CloudMemoryView } from "./components/CloudMemoryView";
 import { SkillWorkshop } from "./components/SkillWorkshop";
-import { PresetTwins } from "./components/PresetTwins";
 import { AISocialMaster } from "./components/AISocialMaster";
+import { UnspokenWords } from "./components/UnspokenWords";
+import { DigitalCemetery } from "./components/DigitalCemetery";
 import { TwinStudio } from "./components/TwinStudio";
-import { getStoredApiKey, setStoredApiKey, getStoredDisplayName, setStoredDisplayName, getStoredGeminiApiKey, setStoredGeminiApiKey, getStoredOpenAIApiKey, setStoredOpenAIApiKey } from "./api/twinApi";
+import { getStoredApiKey, setStoredApiKey, getStoredDisplayName, setStoredDisplayName, getStoredGeminiApiKey, setStoredGeminiApiKey, getStoredOpenAIApiKey, setStoredOpenAIApiKey, getDemoSoulConfig } from "./api/twinApi";
 
-type TabType = "studio" | "wizard" | "evo-chat" | "memory" | "cloud" | "skills" | "presets" | "aisocial";
+type TabType = "studio" | "wizard" | "evo-chat" | "memory" | "cloud" | "skills" | "aisocial" | "unspoken" | "cemetery";
 
 export const App: React.FC = () => {
   const [tab, setTab] = useState<TabType>("studio");
@@ -25,6 +26,23 @@ export const App: React.FC = () => {
     return name || "已连接";
   });
   const twinId = "demo-twin-001";
+
+  // 评委打开时从服务器拉取 Demo 灵魂配置，写入 localStorage，供分身养成中心与聊天记忆使用
+  useEffect(() => {
+    getDemoSoulConfig().then((data) => {
+      if (!data.formState || Object.keys(data.formState).length === 0) return;
+      try {
+        for (let level = 1; level <= 6; level++) {
+          const fromServer = data.formState[level];
+          if (fromServer && typeof fromServer === "object") {
+            localStorage.setItem(`twin_soul_level_${level}_keywords`, JSON.stringify(fromServer));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    });
+  }, []);
 
   const handleSaveApiKey = () => {
     setStoredApiKey(apiKeyInput || null);
@@ -54,18 +72,28 @@ export const App: React.FC = () => {
   return (
     <div className="app-root">
       <header className="app-header">
-        <div className="logo">Personal Digital Twin</div>
-        <div className="subtitle">分身性格升级向导 + 记忆聊天</div>
+        <div className="logo">
+          <img src="/logo/infinity.png" alt="Aeterna · 数字永生 Logo" className="logo-icon" />
+          <div className="logo-text">
+            <div className="logo-text-en">Aeterna</div>
+            <div className="logo-text-zh">数字永生</div>
+          </div>
+        </div>
         <div className="app-header__user">
           {headerLabel && (
-            <>
+            <div className="app-header__user-badge">
               <span className="app-header__user-name" title="已连接 EverMemOS">
                 {headerLabel}
               </span>
-              <button type="button" className="app-header__logout" onClick={handleLogout} title="清除 API Key，退出当前账号">
+              <button
+                type="button"
+                className="app-header__logout"
+                onClick={handleLogout}
+                title="清除 API Key，退出当前账号"
+              >
                 退出
               </button>
-            </>
+            </div>
           )}
           <button
             type="button"
@@ -141,70 +169,93 @@ export const App: React.FC = () => {
         </div>
       )}
       <main className="app-main">
-        <div className="tabs">
-          <button
-            className={["tab", tab === "wizard" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("wizard")}
-          >
-            灵魂拷贝
-          </button>
-          <button
-            className={["tab", tab === "memory" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("memory")}
-          >
-            📂 记忆碎片
-          </button>
-          <button
-            className={["tab", tab === "cloud" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("cloud")}
-          >
-            ☁️ 云端记忆
-          </button>
-          <button
-            className={["tab", tab === "skills" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("skills")}
-          >
-            🛠️ 能力工坊
-          </button>
-          <button
-            className={["tab", tab === "presets" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("presets")}
-          >
-            👥 辅助智囊团
-          </button>
-          <button
-            className={["tab", tab === "studio" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("studio")}
-            style={{ fontWeight: "bold", color: tab === "studio" ? "inherit" : "#8b5cf6" }}
-          >
-            ⚙️ 分身养成中心
-          </button>
-          <button
-            className={["tab", tab === "evo-chat" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("evo-chat")}
-          >
-            💬 进化聊天室
-          </button>
-          <button
-            className={["tab", tab === "aisocial" ? "tab--active" : ""].filter(Boolean).join(" ")}
-            onClick={() => setTab("aisocial")}
-          >
-            🌐 AI 社交
-          </button>
+        <div className="app-layout">
+          <aside className="app-sidebar">
+            <button
+              className={["tab", "tab--sidebar", tab === "wizard" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("wizard")}
+            >
+              <span className="tab__icon">🧪</span>
+              <span className="tab__label">灵魂拷贝</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "memory" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("memory")}
+            >
+              <span className="tab__icon">📂</span>
+              <span className="tab__label">记忆碎片</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "cloud" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("cloud")}
+            >
+              <span className="tab__icon">☁️</span>
+              <span className="tab__label">云端记忆</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "studio" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("studio")}
+            >
+              <span className="tab__icon">⚙️</span>
+              <span className="tab__label">分身养成中心</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "skills" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("skills")}
+            >
+              <span className="tab__icon">🛠️</span>
+              <span className="tab__label">能力工坊</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "evo-chat" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("evo-chat")}
+            >
+              <span className="tab__icon">💬</span>
+              <span className="tab__label">进化聊天室</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "aisocial" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("aisocial")}
+            >
+              <span className="tab__icon">🌐</span>
+              <span className="tab__label">AI 社交</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "unspoken" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("unspoken")}
+            >
+              <span className="tab__icon">🕰️</span>
+              <span className="tab__label">未尽之言</span>
+            </button>
+            <button
+              className={["tab", "tab--sidebar", tab === "cemetery" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("cemetery")}
+            >
+              <span className="tab__icon">🪦</span>
+              <span className="tab__label">数字墓地</span>
+            </button>
+          </aside>
+          <section className="app-content">
+            {tab === "studio" && (
+              <TwinStudio
+                onNavigateToWorkshop={() => setTab("skills")}
+                onNavigateToMemoryVault={() => setTab("memory")}
+              />
+            )}
+            {tab === "wizard" && <PersonalityWizard twinId={twinId} />}
+            {tab === "evo-chat" && <EvolutionChat twinId={twinId} onNavigateToPresets={() => setTab("presets")} />}
+            {tab === "memory" && <MemoryVault />}
+            {tab === "cloud" && <CloudMemoryView twinId={twinId} />}
+            {tab === "skills" && (
+              <SkillWorkshop
+                onActivateSkill={() => setTab("evo-chat")}
+              />
+            )}
+            {tab === "aisocial" && <AISocialMaster />}
+            {tab === "unspoken" && <UnspokenWords />}
+            {tab === "cemetery" && <DigitalCemetery />}
+          </section>
         </div>
-        {tab === "studio" && (
-          <TwinStudio
-            onNavigateToWorkshop={() => setTab("skills")}
-            onNavigateToMemoryVault={() => setTab("memory")}
-          />
-        )}
-        {tab === "wizard" && <PersonalityWizard twinId={twinId} />}
-        {tab === "evo-chat" && <EvolutionChat twinId={twinId} onNavigateToPresets={() => setTab("presets")} />}
-        {tab === "memory" && <MemoryVault />}
-        {tab === "cloud" && <CloudMemoryView twinId={twinId} />}
-        {tab === "skills" && <SkillWorkshop />}
-        {tab === "presets" && <PresetTwins />}
-        {tab === "aisocial" && <AISocialMaster />}
       </main>
     </div>
   );

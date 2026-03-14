@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { generateAvatarWithGemini } from "../api/twinApi";
 
 interface TwinStudioProps {
   onNavigateToWorkshop?: () => void;
@@ -7,17 +8,134 @@ interface TwinStudioProps {
 }
 
 export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, onNavigateToMemoryVault }) => {
-  // Main Studio State
+  // Main Studio State：聚焦一个本体分身
   const [twins, setTwins] = useState([
-    { id: "t-001", name: "工作分身 (Evermind)", desc: "严谨 / 效率优选", avatar: "👩🏻‍💻", purpose: "work" as "work" | "social" },
-    { id: "t-002", name: "娱乐分身 (Chill)", desc: "幽默 / 电影达人", avatar: "😎", purpose: "social" as "work" | "social" }
+    { id: "t-001", name: "数字永生分身", desc: "基于你全部人生记忆的一体化分身", avatar: "🧬" }
   ]);
   const [activeTwinId, setActiveTwinId] = useState("t-001");
-  const [studioTab, setStudioTab] = useState<"dashboard" | "appearance" | "personality" | "skill" | "memory">("dashboard");
-  // New state for twin purpose (social or work)
-  const [twinPurpose, setTwinPurpose] = useState<'social' | 'work'>('work');
-  // State to control purpose selection modal visibility
-  const [showPurposeModal, setShowPurposeModal] = useState(false);
+  const [studioTab, setStudioTab] = useState<"dashboard" | "appearance" | "personality" | "memory">("dashboard");
+
+  // 与 EvolutionChat 共享的大脑同步率，读取 localStorage，默认 55%
+  const loadSyncRate = () => {
+    try {
+      const raw = window.localStorage.getItem("twin_sync_rate");
+      const n = raw != null ? Number(raw) : NaN;
+      if (!Number.isNaN(n) && n >= 0 && n <= 100) return n;
+    } catch {/* ignore */}
+    return 55;
+  };
+  const [syncRate, setSyncRate] = useState<number>(() => loadSyncRate());
+
+  // 认知维度矩阵（从 localStorage.twin_cognitive_profile 读取）
+  type CogDim =
+    | "emotional_stability"
+    | "social_energy"
+    | "openness_imagination"
+    | "structure_execution"
+    | "value_boundary"
+    | "self_reflection";
+
+  const loadCognitiveProfile = () => {
+    try {
+      const raw = window.localStorage.getItem("twin_cognitive_profile");
+      if (!raw) return null;
+      const data = JSON.parse(raw) as Partial<Record<CogDim, number>>;
+      return data;
+    } catch {
+      return null;
+    }
+  };
+  const [cogProfile, setCogProfile] = useState<Partial<Record<CogDim, number>> | null>(() => loadCognitiveProfile());
+
+  // 统计：已完成的人格关卡数量（本地以是否存在 twin_soul_level_X_keywords 为准）
+  const computeCompletedLevels = () => {
+    let count = 0;
+    try {
+      for (let level = 1; level <= 6; level++) {
+        const raw = window.localStorage.getItem(`twin_soul_level_${level}_keywords`);
+        if (!raw) continue;
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj === "object" && Object.keys(obj).length > 0) {
+          count++;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return count;
+  };
+
+  const [completedLevels, setCompletedLevels] = useState<number>(() => computeCompletedLevels());
+
+  // 统计：已同步到 EverMemOS 且未本地删除的记忆碎片数量
+  const computeSyncedVaultCount = () => {
+    try {
+      const raw = window.localStorage.getItem("twin_memory_vault");
+      if (!raw) return 0;
+      const vault = JSON.parse(raw) as {
+        messageId?: string;
+        deletedLocally?: boolean;
+      }[];
+      if (!Array.isArray(vault)) return 0;
+      return vault.filter((m) => m.messageId && !m.deletedLocally).length;
+    } catch {
+      return 0;
+    }
+  };
+
+  const [syncedVaultCount, setSyncedVaultCount] = useState<number>(() => computeSyncedVaultCount());
+
+  // 进化阶段：embryo -> mirror -> partner -> twin
+  type EvolutionStage = "embryo" | "mirror" | "partner" | "twin";
+
+  const getEvolutionStage = (
+    levels: number,
+    vaultCount: number,
+    rate: number
+  ): EvolutionStage => {
+    const levelsScore = (levels / 6) * 40;
+    const cappedVault = Math.min(vaultCount, 30);
+    const vaultScore = (cappedVault / 30) * 30;
+    const syncScore = (rate / 100) * 30;
+    const evoScore = levelsScore + vaultScore + syncScore;
+
+    if (evoScore < 25) {
+      return "embryo";
+    }
+
+    if (evoScore < 55) {
+      if (levels >= 2 && vaultCount >= 1) {
+        return "mirror";
+      }
+      return "embryo";
+    }
+
+    if (evoScore < 80) {
+      if (levels >= 4 && vaultCount >= 5 && rate >= 60) {
+        return "partner";
+      }
+      return "mirror";
+    }
+
+    if (levels === 6 && vaultCount >= 15 && rate >= 80) {
+      return "twin";
+    }
+
+    return "partner";
+  };
+
+  const [evoStage, setEvoStage] = useState<EvolutionStage>(() =>
+    getEvolutionStage(completedLevels, syncedVaultCount, syncRate)
+  );
+
+  // 当同步率或本地数据更新时，重新计算阶段
+  useEffect(() => {
+    const levels = computeCompletedLevels();
+    const vault = computeSyncedVaultCount();
+    setCompletedLevels(levels);
+    setSyncedVaultCount(vault);
+    setEvoStage(getEvolutionStage(levels, vault, syncRate));
+  }, [syncRate]);
 
   const activeTwin = twins.find(t => t.id === activeTwinId) || twins[0];
 
@@ -27,25 +145,81 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
     "/avatars/memoji/1.png",
     "/avatars/memoji/2.png",
     "/avatars/memoji/3.png",
-    "/avatars/memoji/4.png",
-    "/avatars/memoji/5.png",
-    "/avatars/memoji/6.png",
-    "/avatars/memoji/7.png",
-    "/avatars/memoji/8.png",
+    "/avatars/memoji/4.PNG",
+    "/avatars/memoji/5.PNG",
+    "/avatars/memoji/6.PNG",
+    "/avatars/memoji/7.PNG",
+    "/avatars/memoji/8.PNG",
+    "/avatars/memoji/9.PNG",
+    "/avatars/memoji/10.PNG",
   ];
-  const [selectedPreset, setSelectedPreset] = useState(memojiPresets[1]);
+  const [selectedPreset, setSelectedPreset] = useState(memojiPresets[0]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [avatarPromptText, setAvatarPromptText] = useState("");
+  const [avatarGenerateLoading, setAvatarGenerateLoading] = useState(false);
+  const [avatarGenerateError, setAvatarGenerateError] = useState<string | null>(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+
+  const TWIN_AVATAR_STORAGE_KEY = "twin_avatar";
+
+  const saveAvatarToTwin = (value: string) => {
+    setTwins(prev => prev.map(t => t.id === activeTwinId ? { ...t, avatar: value } : t));
+    try {
+      window.localStorage.setItem(TWIN_AVATAR_STORAGE_KEY, value);
+    } catch { /* ignore */ }
+  };
+
+  // 方案 A：从 localStorage 恢复头像（刷新/重新打开后仍显示上次选择的头像）
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(TWIN_AVATAR_STORAGE_KEY);
+      if (!raw || typeof raw !== "string") return;
+      if (raw.startsWith("data:")) {
+        setUploadedImage(raw);
+        setAvatarTab("upload");
+        setTwins(prev => prev.map(t => t.id === activeTwinId ? { ...t, avatar: raw } : t));
+      } else {
+        if (memojiPresets.includes(raw)) setSelectedPreset(raw);
+        setTwins(prev => prev.map(t => t.id === activeTwinId ? { ...t, avatar: raw } : t));
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   // Soul Copy State (Linked to Personality Wizard Levels)
-  const [selectedSouls, setSelectedSouls] = useState<number[]>([1, 2, 3]);
+  const [selectedSouls] = useState<number[]>([1, 2, 3]);
+  const [soulKeywords, setSoulKeywords] = useState<Record<number, string>>({});
 
-  const toggleSoul = (levelId: number) => {
-    setSelectedSouls(prev =>
-      prev.includes(levelId)
-        ? prev.filter(id => id !== levelId)
-        : [...prev, levelId]
-    );
-  };
+  // 从 localStorage 读取灵魂关键词（含评委打开时 App 预填的 Demo 数据）；切到「灵魂注入」时刷新
+  useEffect(() => {
+    const next: Record<number, string> = {};
+    [1, 2, 3, 4, 5, 6].forEach((level) => {
+      try {
+        const raw = localStorage.getItem(`twin_soul_level_${level}_keywords`);
+        if (!raw) return;
+        const data = JSON.parse(raw) as Record<string, unknown>;
+        const values: string[] = [];
+        Object.values(data).forEach((v) => {
+          if (typeof v === "string") {
+            const trimmed = v.trim();
+            if (trimmed) values.push(trimmed);
+          } else if (Array.isArray(v)) {
+            (v as unknown[]).forEach((item) => {
+              if (typeof item === "string") {
+                const t = item.trim();
+                if (t) values.push(t);
+              }
+            });
+          }
+        });
+        if (values.length > 0) {
+          next[level] = values.slice(0, 3).join(" / ");
+        }
+      } catch {
+        // ignore parse errors
+      }
+    });
+    setSoulKeywords(next);
+  }, [studioTab]);
 
   // Twin Specific Skills State
   const [activeSkills, setActiveSkills] = useState([
@@ -91,25 +265,48 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
     setActiveSkills(newSkills);
   };
 
-  // Twin Specific Memory Fragments (Mock)
-  const [activeMemories, setActiveMemories] = useState([
-    {
-      id: "m-001",
-      date: "2023-10-14",
-      content: "第一次在东京看到了真实的雪，那种寂静的光影深深印在脑海里。",
-      tags: ["#Travel", "#Winter", "#Aesthetic"],
-      type: "text",
-      isActive: true
-    },
-    {
-      id: "m-003",
-      date: "2024-05-20",
-      content: "《给未来的自己》音频录音。长达 45 分钟的内心独白。",
-      tags: ["#Voice", "#Reflection"],
-      type: "audio",
-      isActive: true
+  // Twin Specific Memory Fragments：从 Memory Vault 里已上传到 EverMemOS 的碎片生成
+  type ActiveMemory = {
+    id: string;
+    date: string;
+    content: string;
+    tags: string[];
+    type: "text" | "audio";
+    isActive: boolean;
+  };
+
+  const loadActiveMemoriesFromVault = (): ActiveMemory[] => {
+    try {
+      const raw = window.localStorage.getItem("twin_memory_vault");
+      if (!raw) return [];
+      const vault = JSON.parse(raw) as {
+        id: string;
+        date: string;
+        content: string;
+        tags: string[];
+        type: string;
+        messageId?: string;
+        deletedLocally?: boolean;
+      }[];
+      if (!Array.isArray(vault)) return [];
+
+      // 只取：1）已同步 EverMemOS（有 messageId）；2）未标记本地删除
+      return vault
+        .filter((m) => m.messageId && !m.deletedLocally)
+        .map((m) => ({
+          id: m.id,
+          date: m.date,
+          content: m.content,
+          tags: m.tags || [],
+          type: (m.type === "audio" ? "audio" : "text") as "text" | "audio",
+          isActive: true,
+        }));
+    } catch {
+      return [];
     }
-  ]);
+  };
+
+  const [activeMemories, setActiveMemories] = useState<ActiveMemory[]>(() => loadActiveMemoriesFromVault());
 
   const toggleMemory = (id: string) => {
     setActiveMemories(prev => prev.map(m => m.id === id ? { ...m, isActive: !m.isActive } : m));
@@ -118,6 +315,13 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
   const deleteMemory = (id: string) => {
     setActiveMemories(prev => prev.filter(m => m.id !== id));
   };
+
+  // 每次切到「记忆碎片注入」标签页时，刷新一次数据，与 Memory Vault 保持一致
+  useEffect(() => {
+    if (studioTab === "memory") {
+      setActiveMemories(loadActiveMemoriesFromVault());
+    }
+  }, [studioTab]);
 
   // Simplistic mock drag implementation
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -137,6 +341,19 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
   // Voice Engine State
   const [isRecording, setIsRecording] = useState(false);
 
+  const handleGenerateAvatar = async () => {
+    setAvatarGenerateError(null);
+    setAvatarGenerateLoading(true);
+    try {
+      const { dataUrl } = await generateAvatarWithGemini(avatarPromptText);
+      setGeneratedImageUrl(dataUrl);
+    } catch (e) {
+      setAvatarGenerateError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setAvatarGenerateLoading(false);
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -144,22 +361,29 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string;
         setUploadedImage(dataUrl);
-        // Sync to active twin
-        setTwins(prev => prev.map(t => t.id === activeTwinId ? { ...t, avatar: dataUrl } : t));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Mock Data for Radar Chart
-  const radarData = [
-    { subject: '逻辑理性', A: 85, fullMark: 100 },
-    { subject: '情感共鸣', A: 65, fullMark: 100 },
-    { subject: '幽默活力', A: 90, fullMark: 100 },
-    { subject: '处事果敢', A: 75, fullMark: 100 },
-    { subject: '探索好奇', A: 88, fullMark: 100 },
-    { subject: '言谈默契', A: 82, fullMark: 100 },
-  ];
+  // Radar Chart Data：若有认知矩阵则使用真实值，否则使用轻量占位
+  const radarData = cogProfile
+    ? [
+        { subject: "情绪稳定度", A: cogProfile.emotional_stability ?? 50, fullMark: 100 },
+        { subject: "社交能量", A: cogProfile.social_energy ?? 50, fullMark: 100 },
+        { subject: "开放性·想象力", A: cogProfile.openness_imagination ?? 50, fullMark: 100 },
+        { subject: "结构化·执行力", A: cogProfile.structure_execution ?? 50, fullMark: 100 },
+        { subject: "价值观边界", A: cogProfile.value_boundary ?? 50, fullMark: 100 },
+        { subject: "自我反省力", A: cogProfile.self_reflection ?? 50, fullMark: 100 },
+      ]
+    : [
+        { subject: "情绪稳定度", A: 55, fullMark: 100 },
+        { subject: "社交能量", A: 55, fullMark: 100 },
+        { subject: "开放性·想象力", A: 55, fullMark: 100 },
+        { subject: "结构化·执行力", A: 55, fullMark: 100 },
+        { subject: "价值观边界", A: 55, fullMark: 100 },
+        { subject: "自我反省力", A: 55, fullMark: 100 },
+      ];
 
   return (
     <div className="studio-container">
@@ -181,15 +405,11 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                 )}
               </div>
               <div className="roster-info">
-                <h3>{twin.name} <span className={`twin-badge twin-badge-${twin.purpose}`}>{twin.purpose === 'work' ? '工作' : '社交'}</span></h3>
+                <h3>{twin.name} <span className="twin-badge twin-badge-core">本体</span></h3>
                 <p>{twin.desc}</p>
               </div>
             </div>
           ))}
-
-          <button className="btn-create-twin" onClick={() => setShowPurposeModal(true)}>
-            + 创建新分身
-          </button>
         </div>
       </aside>
 
@@ -222,18 +442,6 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
             >
               📚 记忆碎片注入
             </button>
-            {activeTwin.purpose !== 'social' ? (
-              <button
-                className={`config-tab ${studioTab === "skill" ? "active" : ""}`}
-                onClick={() => setStudioTab("skill")}
-              >
-                🛠️ Skill配置
-              </button>
-            ) : (
-              <button className="config-tab disabled" title="真实的灵魂不需要冰冷的工具链。社交分身不支持挂载Skill。">
-                <span style={{ opacity: 0.5 }}>🛠️ <s>Skill配置</s></span>
-              </button>
-            )}
           </div>
         </header>
 
@@ -243,33 +451,134 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
               <div className="dashboard-top-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
 
                 {/* Life Ring: Brain Sync Rate */}
-                <div className="workshop-card life-ring-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
-                  <h3 className="card-title" style={{ alignSelf: 'flex-start', marginBottom: '24px' }}>大脑同步率</h3>
+                <div
+                  className="workshop-card life-ring-card"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '32px',
+                  }}
+                >
+                  <div style={{ alignSelf: 'stretch', display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                    <h3 className="card-title" style={{ marginBottom: 0 }}>大脑同步率</h3>
+                    <div
+                      className="milestone-info-badge"
+                      title={
+                        "大脑同步率代表「当前分身回答与你期望的贴合程度」，范围 0%~100%。\n\n" +
+                        "当前 Demo 版本的同步率主要由聊天反馈驱动：\n" +
+                        "• 当你对分身的回复点 👍 时，同步率会小幅上升；\n" +
+                        "• 当你点 👎 时，同步率会小幅下降；\n" +
+                        "• 每次调整都会被记录在本地（twin_sync_rate），并在进化聊天室与分身养成中心之间联动显示。\n\n" +
+                        "后续可以接入更多信号（如回答质量评估、任务完成度等）进一步丰富这一指标。"
+                      }
+                    >
+                      <svg
+                        viewBox="0 0 1024 1024"
+                        aria-hidden="true"
+                        focusable="false"
+                        className="milestone-info-icon"
+                      >
+                        <path d="M512 64a448 448 0 1 0 0 896A448 448 0 0 0 512 64z m0 820.032A372.032 372.032 0 0 1 512 139.968a372.032 372.032 0 0 1 0 744.064z" />
+                        <path d="M464 688a48 48 0 1 0 96 0 48 48 0 0 0-96 0zM488 576h48a8 8 0 0 0 8-8v-272a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v272c0 4.416 3.584 8 8 8z" />
+                      </svg>
+                    </div>
+                  </div>
                   <div className="life-ring-container">
                     <svg viewBox="0 0 100 100" className="life-ring-svg">
+                      <defs>
+                        <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#7c3aed" />
+                          <stop offset="50%" stopColor="#0ea5e9" />
+                          <stop offset="100%" stopColor="#ec4899" />
+                        </linearGradient>
+                      </defs>
                       <circle cx="50" cy="50" r="45" className="life-ring-bg" />
-                      <circle cx="50" cy="50" r="45" className="life-ring-progress" strokeDasharray="283" strokeDashoffset="28" />
+                      {/* 283 ≈ 2πr，当同步率为 100% 时完整闭合，这里按当前 syncRate 动态计算 */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        className="life-ring-progress"
+                        strokeDasharray="283"
+                        strokeDashoffset={283 - (283 * syncRate) / 100}
+                      />
                     </svg>
                     <div className="life-ring-text">
-                      <span className="sync-value">90</span>
+                      <span className="sync-value">{syncRate}</span>
                       <span className="sync-unit">%</span>
                     </div>
                   </div>
                   <div className="life-ring-status" style={{ marginTop: '24px', color: '#10b981', fontSize: '14px', fontWeight: 500 }}>
-                    状态：高度共联
+                    状态：{syncRate >= 90 ? "极高共联" : syncRate >= 80 ? "高度共联" : "基础共联"}
                   </div>
+                  <button
+                    type="button"
+                    className="dc-btn-secondary"
+                    style={{ marginTop: '16px', fontSize: '12px' }}
+                    onClick={() => {
+                      // 手动从 localStorage 重新拉一次同步率 + 认知维度矩阵
+                      const nextRate = loadSyncRate();
+                      setSyncRate(nextRate);
+                      const nextProfile = loadCognitiveProfile();
+                      setCogProfile(nextProfile);
+                    }}
+                  >
+                    刷新同步率与认知矩阵
+                  </button>
                 </div>
 
                 {/* Hexagon Radar Chart */}
                 <div className="workshop-card radar-chart-card" style={{ display: 'flex', flexDirection: 'column' }}>
-                  <h3 className="card-title" style={{ marginBottom: '16px' }}>认知维度矩阵</h3>
-                  <div style={{ flex: 1, minHeight: '250px', width: '100%' }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                    <h3 className="card-title" style={{ marginBottom: 0 }}>认知维度矩阵</h3>
+                    <div
+                      className="milestone-info-badge"
+                      title={
+                        "认知维度矩阵 = 6 个画像维度：情绪稳定、社交能量、开放性·想象力、结构化·执行力、价值观边界、自我反省力。\n\n" +
+                        "当前分数综合了三类信号：\n" +
+                        "• 人格完整度：你在「灵魂拷贝」6 个关卡中填入的资料越多，分身的人格画像越完整；\n" +
+                        "• 记忆碎片：你在 Memory Vault 中上传到 EverMemOS 的碎片（及其标签），会影响对应维度的权重；\n" +
+                        "• 聊天反馈：在进化聊天室里对分身回复点 👍 / 👎，会对这些维度做轻微的长期微调，让画像慢慢贴近真实的你。\n\n" +
+                        "所有计算都只在本地浏览器完成，并缓存在 twin_cognitive_profile 中，方便你反复查看与对比。"
+                      }
+                    >
+                      <svg
+                        viewBox="0 0 1024 1024"
+                        aria-hidden="true"
+                        focusable="false"
+                        className="milestone-info-icon"
+                      >
+                        <path d="M512 64a448 448 0 1 0 0 896A448 448 0 0 0 512 64z m0 820.032A372.032 372.032 0 0 1 512 139.968a372.032 372.032 0 0 1 0 744.064z" />
+                        <path d="M464 688a48 48 0 1 0 96 0 48 48 0 0 0-96 0zM488 576h48a8 8 0 0 0 8-8v-272a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v272c0 4.416 3.584 8 8 8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, minHeight: '260px', width: '100%' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                        <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                        <Radar name={activeTwin.name} dataKey="A" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.4} />
+                        <PolarGrid stroke="rgba(148,163,184,0.35)" strokeDasharray="3 3" />
+                        <PolarAngleAxis
+                          dataKey="subject"
+                          tick={{ fill: '#94a3b8', fontSize: 11 }}
+                          tickLine={false}
+                          tickMargin={14}
+                        />
+                        <PolarRadiusAxis
+                          angle={90}
+                          domain={[0, 100]}
+                          tick={{ fill: '#9ca3af', fontSize: 9, dy: 5 }}
+                          tickCount={6}
+                          axisLine={false}
+                        />
+                        <Radar
+                          name={activeTwin.name}
+                          dataKey="A"
+                          stroke="#8b5cf6"
+                          fill="#8b5cf6"
+                          fillOpacity={0.35}
+                        />
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
@@ -279,33 +588,62 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
 
               {/* Evolution Milestones */}
               <div className="workshop-card milestones-card">
-                <h3 className="card-title" style={{ marginBottom: '24px' }}>进化里程碑 (Evolution Milestones)</h3>
-                <div className="milestones-timeline">
-                  <div className="milestone-item completed">
-                    <div className="milestone-node"></div>
-                    <div className="milestone-label">胚胎</div>
-                    <div className="milestone-date">09/21</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                  <h3 className="card-title" style={{ marginBottom: 0 }}>进化里程碑 (Evolution Milestones)</h3>
+                  <div
+                    className="milestone-info-badge"
+                    title={
+                      "进化阶段由三部分综合计算：\n" +
+                      "• 人格完成度：完成越多灵魂拷贝关卡，权重越高；\n" +
+                      "• 记忆碎片：上传到 EverMemOS 的记忆碎片越多，记忆越丰富；\n" +
+                      "• 大脑同步率：在进化聊天室中对分身的 👍 / 👎 反馈越多，越接近真实你。\n\n" +
+                      "规则示例：\n" +
+                      "• 初级镜像：至少 2 关人格 + ≥1 条云端碎片；\n" +
+                      "• 高阶分身：≥4 关人格 + ≥5 条云端碎片 + 同步率 ≥ 60；\n" +
+                      "• 数字双生：6 关人格 + ≥15 条云端碎片 + 同步率 ≥ 80。"
+                    }
+                  >
+                    <svg
+                      viewBox="0 0 1024 1024"
+                      aria-hidden="true"
+                      focusable="false"
+                      className="milestone-info-icon"
+                    >
+                      <path d="M512 64a448 448 0 1 0 0 896A448 448 0 0 0 512 64z m0 820.032A372.032 372.032 0 0 1 512 139.968a372.032 372.032 0 0 1 0 744.064z" />
+                      <path d="M464 688a48 48 0 1 0 96 0 48 48 0 0 0-96 0zM488 576h48a8 8 0 0 0 8-8v-272a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v272c0 4.416 3.584 8 8 8z" />
+                    </svg>
                   </div>
-                  <div className="milestone-line active"></div>
+                </div>
+                <div className="milestones-timeline">
+                  <div className={`milestone-item ${evoStage === "embryo" ? "current" : "completed"}`}>
+                    <div className={`milestone-node${evoStage === "embryo" ? " breathing" : ""}`}></div>
+                    <div className="milestone-label">胚胎</div>
+                    <div className="milestone-date">{completedLevels > 0 ? "已觉醒" : "等待觉醒"}</div>
+                  </div>
+                  <div className={`milestone-line ${evoStage === "embryo" ? "inactive" : "active"}`}></div>
 
-                  <div className="milestone-item completed">
+                  <div className={`milestone-item ${evoStage === "mirror" || evoStage === "partner" || evoStage === "twin" ? "completed" : "pending"}`}>
                     <div className="milestone-node"></div>
                     <div className="milestone-label">初级镜像</div>
-                    <div className="milestone-date">10/05</div>
+                    <div className="milestone-date">{completedLevels >= 2 ? "人格成型" : "未解锁"}</div>
                   </div>
-                  <div className="milestone-line active"></div>
+                  <div className={`milestone-line ${evoStage === "partner" || evoStage === "twin" ? "active" : "inactive"}`}></div>
 
-                  <div className="milestone-item current">
-                    <div className="milestone-node breathing"></div>
-                    <div className="milestone-label">默契伴侣</div>
-                    <div className="milestone-date">进行中</div>
+                  <div className={`milestone-item ${evoStage === "partner" ? "current" : evoStage === "twin" ? "completed" : "pending"}`}>
+                    <div className={`milestone-node${evoStage === "partner" ? " breathing" : ""}`}></div>
+                    <div className="milestone-label">高阶分身</div>
+                    <div className="milestone-date">
+                      {syncedVaultCount >= 5 && syncRate >= 60 ? "进行中" : "记忆不足"}
+                    </div>
                   </div>
-                  <div className="milestone-line inactive"></div>
+                  <div className={`milestone-line ${evoStage === "twin" ? "active" : "inactive"}`}></div>
 
-                  <div className="milestone-item pending">
-                    <div className="milestone-node"></div>
+                  <div className={`milestone-item ${evoStage === "twin" ? "current" : "pending"}`}>
+                    <div className={`milestone-node${evoStage === "twin" ? " breathing" : ""}`}></div>
                     <div className="milestone-label">数字双生</div>
-                    <div className="milestone-date">未知</div>
+                    <div className="milestone-date">
+                      {evoStage === "twin" ? "已达成" : "等待更多记忆与反馈"}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -316,23 +654,50 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
             <div className="config-section">
               <div className="workshop-card avatar-engine-card" style={{ marginBottom: "20px" }}>
                 <div className="avatar-engine-layout">
-                  <div className="avatar-display">
-                    <div className={`avatar-hologram ${avatarTab === 'prompt' ? 'generating' : ''}`}>
-                      <div className="avatar-scanline"></div>
-                      {avatarTab === "preset" && (
-                        <div className="avatar-placeholder type-preset" style={{ padding: 0, overflow: 'hidden', width: '100%', height: '100%' }}>
-                          <img src={selectedPreset} alt="Selected preset" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                      )}
-                      {avatarTab === "upload" && (
-                        uploadedImage ? (
-                          <img src={uploadedImage} alt="Uploaded Avatar preview" className="avatar-preview-img" />
-                        ) : (
-                          <div className="avatar-placeholder type-upload">🖼️</div>
-                        )
-                      )}
-                      {avatarTab === "prompt" && <div className="avatar-placeholder type-prompt">✨</div>}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, minHeight: 220, alignSelf: "flex-start", marginTop: 20 }}>
+                    <div className="avatar-display" style={{ height: 160, flexShrink: 0 }}>
+                      <div className={`avatar-hologram ${avatarTab === 'prompt' ? 'generating' : ''}`}>
+                        <div className="avatar-scanline"></div>
+                        {avatarTab === "preset" && (
+                          <div className="avatar-placeholder type-preset" style={{ padding: 0, overflow: 'hidden', width: '100%', height: '100%' }}>
+                            <img src={selectedPreset} alt="Selected preset" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                        )}
+                        {avatarTab === "upload" && (
+                          uploadedImage ? (
+                            <img src={uploadedImage} alt="Uploaded Avatar preview" className="avatar-preview-img" />
+                          ) : (
+                            <div className="avatar-placeholder type-upload">🖼️</div>
+                          )
+                        )}
+                        {avatarTab === "prompt" && (
+                          generatedImageUrl ? (
+                            <img src={generatedImageUrl} alt="AI 生成预览" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          ) : (
+                            <div className="avatar-placeholder type-prompt">✨</div>
+                          )
+                        )}
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      className="btn-generate-avatar"
+                      style={{ alignSelf: "center" }}
+                      disabled={
+                        avatarTab === "upload" ? !uploadedImage :
+                        avatarTab === "prompt" ? !generatedImageUrl : false
+                      }
+                      onClick={() => {
+                        if (avatarTab === "preset") saveAvatarToTwin(selectedPreset);
+                        else if (avatarTab === "upload" && uploadedImage) saveAvatarToTwin(uploadedImage);
+                        else if (avatarTab === "prompt" && generatedImageUrl) {
+                          saveAvatarToTwin(generatedImageUrl);
+                          setUploadedImage(generatedImageUrl);
+                        }
+                      }}
+                    >
+                      保存
+                    </button>
                   </div>
 
                   <div className="avatar-controls">
@@ -354,21 +719,38 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
 
                     <div className="avatar-tab-content" style={{ minHeight: "130px", padding: "16px" }}>
                       {avatarTab === "preset" && (
-                        <div className="preset-grid preset-memoji-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-                          {memojiPresets.map(path => (
-                            <div
-                              key={path}
-                              className={`preset-item memoji-item ${selectedPreset === path ? 'active' : ''}`}
-                              onClick={() => {
-                                setSelectedPreset(path);
-                                setTwins(prev => prev.map(t => t.id === activeTwinId ? { ...t, avatar: path } : t));
-                              }}
-                              style={{ padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60px' }}
-                            >
-                              <img src={path} alt="Memoji preset" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                          ))}
-                        </div>
+                        <>
+                          <div
+                            className="preset-grid preset-memoji-grid"
+                            style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}
+                          >
+                            {memojiPresets.map(path => (
+                              <div
+                                key={path}
+                                className={`preset-item memoji-item ${selectedPreset === path ? 'active' : ''}`}
+                                onClick={() => setSelectedPreset(path)}
+                                style={{
+                                  padding: 0,
+                                  overflow: 'hidden',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  height: '56px',
+                                }}
+                              >
+                                <img
+                                  src={path}
+                                  alt="Memoji preset"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </>
                       )}
                       {avatarTab === "upload" && (
                         <div className="upload-zone">
@@ -386,8 +768,21 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                             className="prompt-input"
                             placeholder="例如：赛博朋克风格的亚洲女性，留着蓝色短发..."
                             style={{ minHeight: "60px" }}
-                          ></textarea>
-                          <button className="btn-generate-avatar">✨ 开始渲染</button>
+                            value={avatarPromptText}
+                            onChange={e => setAvatarPromptText(e.target.value)}
+                            disabled={avatarGenerateLoading}
+                          />
+                          {avatarGenerateError && (
+                            <p style={{ margin: "8px 0 0", fontSize: 12, color: "#f87171" }}>{avatarGenerateError}</p>
+                          )}
+                          <button
+                            type="button"
+                            className="btn-generate-avatar"
+                            onClick={handleGenerateAvatar}
+                            disabled={avatarGenerateLoading}
+                          >
+                            {avatarGenerateLoading ? "生成中…" : "✨ 开始渲染"}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -417,16 +812,6 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                   </button>
                 </div>
               </div>
-              {/* Setup Wizard Footer */}
-              <div className="wizard-footer" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
-                <button
-                  className="btn-launch-sandbox"
-                  style={{ width: 'auto', padding: '12px 32px' }}
-                  onClick={() => setStudioTab("personality")}
-                >
-                  保存并下一步 (灵魂注入) ➔
-                </button>
-              </div>
             </div>
           )}
 
@@ -444,36 +829,23 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                     { id: 4, title: "Level 4: 价值观与道德边界", desc: "决定了分身的批判性思维和对待争议问题的态度。" },
                     { id: 5, title: "Level 5: 知识体系与技能图谱", desc: "专业词汇体系与解决问题的逻辑范式。" },
                     { id: 6, title: "Level 6: 潜意识与梦境", desc: "最深层的意识流，影响分身的幽默感与艺术直觉。" }
-                  ].map(soul => {
-                    const isSelected = selectedSouls.includes(soul.id);
-                    return (
-                      <div
-                        key={soul.id}
-                        className={`soul-binding-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => toggleSoul(soul.id)}
-                      >
-                        <div className="soul-binding-checkbox">
-                          {isSelected && <span className="checkmark">✓</span>}
+                  ].map(soul => (
+                    <div
+                      key={soul.id}
+                      className="soul-binding-item"
+                    >
+                      {soulKeywords[soul.id] && (
+                        <div className="soul-keywords-wall">
+                          {soulKeywords[soul.id]}
                         </div>
-                        <div className="soul-binding-info">
-                          <h4>{soul.title}</h4>
-                          <p>{soul.desc}</p>
-                        </div>
-                        {isSelected && <div className="soul-binding-badge">已注入</div>}
+                      )}
+                      <div className="soul-binding-info">
+                        <h4>{soul.title}</h4>
+                        <p>{soul.desc}</p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
-              </div>
-              {/* Setup Wizard Footer */}
-              <div className="wizard-footer" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
-                <button
-                  className="btn-launch-sandbox"
-                  style={{ width: 'auto', padding: '12px 32px' }}
-                  onClick={() => setStudioTab("memory")}
-                >
-                  保存并下一步 (记忆碎片) ➔
-                </button>
               </div>
             </div>
           )}
@@ -496,25 +868,18 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                 </div>
 
                 <div className="memory-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {activeMemories.map((memory, index) => (
+                  {activeMemories.map((memory) => (
                     <div
                       key={memory.id}
-                      className={`plugin-item memory-card-list-item ${!memory.isActive ? 'disabled' : ''}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => handleDrop(e, index)}
+                      className="plugin-item memory-card-list-item"
                       style={{
-                        gap: '16px', position: 'relative',
-                        opacity: memory.isActive ? 1 : 0.5, transition: 'all 0.2s'
+                        gap: '16px',
+                        position: 'relative',
+                        opacity: 1,
+                        transition: 'all 0.2s'
                       }}
                     >
-                      {/* Drag Handle */}
-                      <div className="drag-handle" style={{ display: 'flex', alignItems: 'center', color: '#64748b', cursor: 'grab', fontSize: '20px' }}>
-                        ⋮⋮
-                      </div>
-
-                      {/* Content Area */}
+                      {/* Content Area（只读） */}
                       <div className="memory-content-area" style={{ flex: 1 }}>
                         <div className="memory-header" style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <strong className={`memory-type type-${memory.type}`} style={{ fontSize: '15px', color: '#1e293b' }}>
@@ -523,204 +888,41 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                             {memory.type === "audio" && "🎤 录音"}
                           </strong>
                           <span className="memory-date" style={{ fontSize: '12px', color: '#64748b' }}>{memory.date}</span>
+                          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '999px', background: 'rgba(59,130,246,0.08)', color: '#2563eb' }}>
+                            来自 Memory Vault
+                          </span>
                         </div>
                         <p style={{ margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.5', color: '#64748b' }}>{memory.content}</p>
                         <div className="memory-tags">
                           {memory.tags.map(tag => (
-                            <span key={tag} className="tag" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', fontSize: '12px', padding: '2px 8px', borderRadius: '4px', marginRight: '6px' }}>{tag}</span>
+                            <span
+                              key={tag}
+                              className="tag"
+                              style={{
+                                background: 'rgba(52, 211, 153, 0.1)',
+                                color: '#34d399',
+                                fontSize: '12px',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                marginRight: '6px'
+                              }}
+                            >
+                              {tag}
+                            </span>
                           ))}
                         </div>
                       </div>
-
-                      {/* Actions Area */}
-                      <div className="memory-actions-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', minWidth: '80px' }}>
-
-                        <label className="toggle-switch" style={{ margin: 0 }}>
-                          <input
-                            type="checkbox"
-                            checked={memory.isActive}
-                            onChange={() => toggleMemory(memory.id)}
-                          />
-                          <span className="toggle-slider"></span>
-                        </label>
-
-                        <button
-                          onClick={() => deleteMemory(memory.id)}
-                          style={{
-                            background: 'transparent', border: 'none', color: '#ef4444',
-                            cursor: 'pointer', fontSize: '18px', padding: '4px',
-                            opacity: 0.7, transition: 'opacity 0.2s',
-                            marginTop: '24px'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-                          onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
-                          title="删除记忆"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-
                     </div>
                   ))}
                 </div>
               </div>
               {/* Setup Wizard Footer */}
-              <div className="wizard-footer" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
-                <button
-                  className="btn-launch-sandbox"
-                  style={{ width: 'auto', padding: '12px 32px' }}
-                  onClick={() => setStudioTab("skill")}
-                >
-                  保存并下一步 (Skill配置) ➔
-                </button>
-              </div>
-            </div>
-          )}
-
-          {studioTab === "skill" && (
-            <div className="config-section">
-              <div className="workshop-card" style={{ marginBottom: "0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
-                  <div>
-                    <h3 className="card-title" style={{ marginBottom: "6px" }}>已获技能 (Active Skills)</h3>
-                    <p className="workshop-desc" style={{ marginBottom: "0" }}>控制当前分身可运行的现实世界业务能力。</p>
-                  </div>
-                  <button
-                    className="btn-create-twin"
-                    style={{ margin: 0, padding: "8px 16px", display: "flex", alignItems: "center", gap: "6px" }}
-                    onClick={onNavigateToWorkshop}
-                  >
-                    <span>+</span> 添加更多技能
-                  </button>
-                </div>
-
-                <ul className="plugin-list">
-                  {activeSkills.map((skill, index) => (
-                    <li
-                      key={skill.id}
-                      className={`plugin-item ${!skill.isActive ? 'disabled' : ''}`}
-                      draggable
-                      onDragStart={(e) => handleSkillDragStart(e, index)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => handleSkillDrop(e, index)}
-                      style={{
-                        display: 'flex', gap: '16px', position: 'relative',
-                        opacity: skill.isActive ? 1 : 0.5, transition: 'all 0.2s', cursor: 'default'
-                      }}
-                    >
-                      {/* Drag Handle */}
-                      <div className="drag-handle" style={{ display: 'flex', alignItems: 'center', color: '#64748b', cursor: 'grab', fontSize: '20px' }}>
-                        ⋮⋮
-                      </div>
-
-                      {/* Content Area */}
-                      <div className="plugin-info" style={{ flex: 1, paddingRight: '20px' }}>
-                        <strong style={{ fontSize: '15px', color: '#1e293b', marginBottom: '4px', display: 'block' }}>{skill.title}</strong>
-                        <span style={{ fontSize: '13px', color: '#64748b' }}>{skill.desc}</span>
-                      </div>
-
-                      {/* Actions Area */}
-                      <div className="plugin-actions-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', minWidth: '80px' }}>
-
-                        <label className="toggle-switch" style={{ margin: 0 }}>
-                          <input
-                            type="checkbox"
-                            checked={skill.isActive}
-                            onChange={() => toggleSkill(skill.id)}
-                          />
-                          <span className="toggle-slider"></span>
-                        </label>
-
-                        <button
-                          onClick={() => deleteSkill(skill.id)}
-                          style={{
-                            background: 'transparent', border: 'none', color: '#ef4444',
-                            cursor: 'pointer', fontSize: '18px', padding: '4px',
-                            opacity: 0.7, transition: 'opacity 0.2s',
-                            marginTop: '12px'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-                          onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}
-                          title="卸载技能"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* Setup Wizard Final Footer */}
-              <div className="wizard-footer" style={{ marginTop: '32px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
-                <button
-                  className="btn-launch-sandbox"
-                  style={{ width: 'auto', padding: '12px 32px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)' }}
-                  onClick={() => alert(`成功更新数字分身配置！`)}
-                >
-                  ✅ 完成配置更新
-                </button>
-              </div>
+              {/* 这里不再跳转到 Skill 配置，记忆碎片注入作为当前终点 */}
             </div>
           )}
         </div>
       </main>
 
-      {/* Purpose Selection Modal */}
-      {showPurposeModal && (
-        <div className="purpose-modal-overlay">
-          <div className="purpose-modal">
-            <header className="purpose-modal-header">
-              <h2>选择分身用途 (Select Twin Purpose)</h2>
-              <button className="btn-close-modal" onClick={() => setShowPurposeModal(false)}>×</button>
-            </header>
-            <p className="purpose-modal-desc">不同的用途将决定该分身拥有的配置能力与权限模型。</p>
-
-            <div className="purpose-cards-container">
-              <div
-                className="purpose-card social-purpose"
-                onClick={() => {
-                  setTwins([...twins, { id: `t-00${twins.length + 1}`, name: "新社交分身", desc: "寻找情感共鸣", avatar: "💖", purpose: "social" }]);
-                  setActiveTwinId(`t-00${twins.length + 1}`);
-                  setStudioTab("appearance");
-                  setShowPurposeModal(false);
-                }}
-              >
-                <div className="purpose-icon">💖</div>
-                <h3>生活社交分身</h3>
-                <p>Social Twin</p>
-                <ul className="purpose-features">
-                  <li>✓ 强调个性与灵魂深度</li>
-                  <li>✓ 注入私人记忆碎片</li>
-                  <li>✗ 无法挂载外部工具 Skill</li>
-                  <li>✓ 适合用于沙盒世界交友与陪伴</li>
-                </ul>
-                <div className="btn-select-purpose">选择此用途</div>
-              </div>
-
-              <div
-                className="purpose-card work-purpose"
-                onClick={() => {
-                  setTwins([...twins, { id: `t-00${twins.length + 1}`, name: "新工作分身", desc: "挂载专业技能", avatar: "💼", purpose: "work" }]);
-                  setActiveTwinId(`t-00${twins.length + 1}`);
-                  setStudioTab("appearance");
-                  setIsPurposeModalOpen(false);
-                }}
-              >
-                <div className="purpose-icon">💼</div>
-                <h3>工作 / 助理分身</h3>
-                <p>Work & Utility Twin</p>
-                <ul className="purpose-features">
-                  <li>✓ 可挂载复杂的业务 Skill</li>
-                  <li>✓ 拥有执行外部 API 的权限</li>
-                  <li>✓ 适合用于高效处理特定任务</li>
-                  <li>✓ 可在社交沙盒中寻找创业合伙人</li>
-                </ul>
-                <div className="btn-select-purpose">选择此用途</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
