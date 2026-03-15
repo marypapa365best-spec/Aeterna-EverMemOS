@@ -4,6 +4,9 @@ const EVERMEMOS_KEY_STORAGE = "evermemos_cloud_api_key";
 const EVERMEMOS_DISPLAY_NAME_STORAGE = "evermemos_display_name";
 const GEMINI_KEY_STORAGE = "gemini_api_key";
 const OPENAI_KEY_STORAGE = "openai_api_key";
+const LLM_PROVIDER_STORAGE = "llm_provider";
+
+export type LlmProvider = "openai" | "gemini";
 
 export function getStoredApiKey(): string | null {
   try {
@@ -87,6 +90,34 @@ export function setStoredOpenAIApiKey(key: string | null): void {
   } catch {
     /* ignore */
   }
+}
+
+export function getStoredLlmProvider(): LlmProvider {
+  try {
+    const raw = localStorage.getItem(LLM_PROVIDER_STORAGE);
+    if (raw === "openai" || raw === "gemini") return raw;
+    const hasOpenAI = !!getStoredOpenAIApiKey();
+    const hasGemini = !!getStoredGeminiApiKey();
+    if (hasOpenAI && !hasGemini) return "openai";
+    if (hasGemini && !hasOpenAI) return "gemini";
+    return "openai";
+  } catch {
+    return "openai";
+  }
+}
+
+export function setStoredLlmProvider(provider: LlmProvider): void {
+  try {
+    localStorage.setItem(LLM_PROVIDER_STORAGE, provider);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** 仅返回当前选定大模型对应的 API Key（二选一生效） */
+export function getEffectiveLlmApiKey(): string | null {
+  const provider = getStoredLlmProvider();
+  return provider === "openai" ? getStoredOpenAIApiKey() : getStoredGeminiApiKey();
 }
 
 /**

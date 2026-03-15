@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { TwinSelector } from "./TwinSelector";
 import { TwinChat } from "./TwinChat";
-import { loadSessionMemory, getStoredGeminiApiKey, getStoredOpenAIApiKey, recomputeCognitiveProfile } from "../api/twinApi";
+import { loadSessionMemory, getEffectiveLlmApiKey, recomputeCognitiveProfile } from "../api/twinApi";
 
 type ChatMessage = {
   id: string;
@@ -23,7 +23,7 @@ export const EvolutionChat: React.FC<EvolutionChatProps> = ({ twinId = "demo-twi
   const [sessionMemory, setSessionMemory] = useState<string | null>(null);
   const [memoryLoading, setMemoryLoading] = useState(false);
   const [awakenNote, setAwakenNote] = useState<{ ok: boolean; text: string } | null>(null);
-  const hasLlmKey = !!getStoredGeminiApiKey() || !!getStoredOpenAIApiKey();
+  const hasLlmKey = !!getEffectiveLlmApiKey();
   const isAwakened = sessionMemory !== null;
 
   const handleAwaken = async () => {

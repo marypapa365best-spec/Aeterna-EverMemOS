@@ -8,7 +8,7 @@ import { AISocialMaster } from "./components/AISocialMaster";
 import { UnspokenWords } from "./components/UnspokenWords";
 import { DigitalCemetery } from "./components/DigitalCemetery";
 import { TwinStudio } from "./components/TwinStudio";
-import { getStoredApiKey, setStoredApiKey, getStoredDisplayName, setStoredDisplayName, getStoredGeminiApiKey, setStoredGeminiApiKey, getStoredOpenAIApiKey, setStoredOpenAIApiKey, getDemoSoulConfig } from "./api/twinApi";
+import { getStoredApiKey, setStoredApiKey, getStoredDisplayName, setStoredDisplayName, getStoredGeminiApiKey, setStoredGeminiApiKey, getStoredOpenAIApiKey, setStoredOpenAIApiKey, getStoredLlmProvider, setStoredLlmProvider, getEffectiveLlmApiKey, type LlmProvider, getDemoSoulConfig } from "./api/twinApi";
 
 type TabType = "studio" | "wizard" | "evo-chat" | "memory" | "cloud" | "skills" | "aisocial" | "unspoken" | "cemetery";
 
@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [displayNameInput, setDisplayNameInput] = useState(() => getStoredDisplayName() ?? "");
   const [geminiApiKeyInput, setGeminiApiKeyInput] = useState(() => getStoredGeminiApiKey() ?? "");
   const [openaiApiKeyInput, setOpenaiApiKeyInput] = useState(() => getStoredOpenAIApiKey() ?? "");
+  const [llmProvider, setLlmProvider] = useState<LlmProvider>(() => getStoredLlmProvider());
   const [headerLabel, setHeaderLabel] = useState(() => {
     const key = getStoredApiKey();
     const name = getStoredDisplayName();
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
   const handleSaveApiKey = () => {
     setStoredApiKey(apiKeyInput || null);
     setStoredDisplayName(displayNameInput || null);
+    setStoredLlmProvider(llmProvider);
     setStoredGeminiApiKey(geminiApiKeyInput || null);
     setStoredOpenAIApiKey(openaiApiKeyInput || null);
     setHeaderLabel(apiKeyInput ? (displayNameInput?.trim() || "已连接") : null);
@@ -56,6 +58,7 @@ export const App: React.FC = () => {
   const handleLogout = () => {
     setStoredApiKey(null);
     setStoredDisplayName(null);
+    setStoredLlmProvider("openai");
     setStoredGeminiApiKey(null);
     setStoredOpenAIApiKey(null);
     setHeaderLabel(null);
@@ -67,6 +70,7 @@ export const App: React.FC = () => {
     setDisplayNameInput(getStoredDisplayName() ?? "");
     setGeminiApiKeyInput(getStoredGeminiApiKey() ?? "");
     setOpenaiApiKeyInput(getStoredOpenAIApiKey() ?? "");
+    setLlmProvider(getStoredLlmProvider());
   };
 
   return (
@@ -108,10 +112,12 @@ export const App: React.FC = () => {
       {settingsOpen && (
         <div className="settings-overlay" onClick={() => setSettingsOpen(false)}>
           <div className="settings-modal settings-modal--wide" onClick={(e) => e.stopPropagation()}>
-            <h3>设置</h3>
+            <div className="settings-modal__body">
+              <div className="settings-modal__main">
+                <h3>设置</h3>
 
-            <section className="settings-section">
-              <label className="settings-label">显示名称（选填，显示在右上角）</label>
+                <section className="settings-section">
+                  <label className="settings-label">显示名称（选填，显示在右上角）</label>
               <input
                 type="text"
                 className="settings-input"
@@ -122,48 +128,92 @@ export const App: React.FC = () => {
             </section>
 
             <section className="settings-section">
-              <h4 className="settings-section-title">API Key</h4>
-              <label className="settings-label">EverMemOS（记忆云端）</label>
-              <p className="settings-desc">
-                人格向导提交的配置会保存到您的 EverMemOS 账号。
-                <a href="https://console.evermind.ai/api-keys" target="_blank" rel="noopener noreferrer">在此免费创建</a>
-              </p>
-              <input
-                type="password"
-                className="settings-input"
-                placeholder="EverMemOS API Key"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-              />
-              <label className="settings-label">OpenAI（分身对话）</label>
-              <p className="settings-desc">
-                进化聊天室对话可用 OpenAI 模型。Key 仅发往本应用后端。
-                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">在此创建 OpenAI API Key</a>
-              </p>
-              <input
-                type="password"
-                className="settings-input"
-                placeholder="OpenAI API Key"
-                value={openaiApiKeyInput}
-                onChange={(e) => setOpenaiApiKeyInput(e.target.value)}
-              />
-              <label className="settings-label">Gemini（分身对话）</label>
-              <p className="settings-desc">
-                进化聊天室对话也可用 Google Gemini。
-                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">在此免费创建 Gemini Key</a>
-              </p>
-              <input
-                type="password"
-                className="settings-input"
-                placeholder="Gemini API Key"
-                value={geminiApiKeyInput}
-                onChange={(e) => setGeminiApiKeyInput(e.target.value)}
-              />
-            </section>
+                  <h4 className="settings-section-title">API Key</h4>
+                  <div className="settings-label-row">
+                    <label className="settings-label">EverMemOS（记忆云端）<span className="settings-required">*</span></label>
+                    <span className={`settings-inline-status ${getStoredApiKey() ? "settings-inline-status--on" : ""}`}>
+                      <span className={`settings-status-dot ${getStoredApiKey() ? "settings-status-dot--on" : ""}`} />
+                      {getStoredApiKey() ? "应用中" : "未连接"}
+                    </span>
+                  </div>
+                  <p className="settings-desc">
+                    人格向导提交的配置会保存到您的 EverMemOS 账号。
+                    <a href="https://console.evermind.ai/api-keys" target="_blank" rel="noopener noreferrer">在此免费创建</a>
+                  </p>
+                  <input
+                    type="password"
+                    className="settings-input"
+                    placeholder="EverMemOS API Key"
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                  />
+                  <div className="settings-label-row">
+                    <label className="settings-label">大模型 API（二选一）<span className="settings-required">*</span></label>
+                    <span className={`settings-inline-status ${getEffectiveLlmApiKey() ? "settings-inline-status--on" : ""}`}>
+                      <span className={`settings-status-dot ${getEffectiveLlmApiKey() ? "settings-status-dot--on" : ""}`} />
+                      {getEffectiveLlmApiKey() ? "应用中" : "未连接"}
+                    </span>
+                  </div>
+                  <p className="settings-desc">
+                    进化聊天室与分身对话仅使用当前选中的一种。
+                  </p>
+                  <div className="settings-llm-radio">
+                    <label className="settings-radio-label">
+                      <input
+                        type="radio"
+                        name="llmProvider"
+                        checked={llmProvider === "openai"}
+                        onChange={() => setLlmProvider("openai")}
+                      />
+                      <span>OpenAI</span>
+                    </label>
+                    <label className="settings-radio-label">
+                      <input
+                        type="radio"
+                        name="llmProvider"
+                        checked={llmProvider === "gemini"}
+                        onChange={() => setLlmProvider("gemini")}
+                      />
+                      <span>Gemini</span>
+                    </label>
+                  </div>
+                  {llmProvider === "openai" && (
+                    <>
+                      <p className="settings-desc">
+                        Key 仅发往本应用后端。
+                        <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">在此创建 OpenAI API Key</a>
+                      </p>
+                      <input
+                        type="password"
+                        className="settings-input"
+                        placeholder="OpenAI API Key"
+                        value={openaiApiKeyInput}
+                        onChange={(e) => setOpenaiApiKeyInput(e.target.value)}
+                      />
+                    </>
+                  )}
+                  {llmProvider === "gemini" && (
+                    <>
+                      <p className="settings-desc">
+                        Key 由浏览器直连 Google，不经过本应用后端。
+                        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">在此免费创建 Gemini Key</a>
+                      </p>
+                      <input
+                        type="password"
+                        className="settings-input"
+                        placeholder="Gemini API Key"
+                        value={geminiApiKeyInput}
+                        onChange={(e) => setGeminiApiKeyInput(e.target.value)}
+                      />
+                    </>
+                  )}
+                </section>
 
-            <div className="settings-actions">
-              <button type="button" onClick={() => setSettingsOpen(false)}>取消</button>
-              <button type="button" onClick={handleSaveApiKey}>保存</button>
+                <div className="settings-actions">
+                  <button type="button" onClick={() => setSettingsOpen(false)}>取消</button>
+                  <button type="button" onClick={handleSaveApiKey}>保存</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

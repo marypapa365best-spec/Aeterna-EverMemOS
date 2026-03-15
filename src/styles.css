@@ -161,7 +161,67 @@ body {
 }
 
 .settings-modal--wide {
-  min-width: 420px;
+  min-width: 520px;
+  width: 520px;
+}
+
+.settings-modal__body {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.settings-modal__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-label-row {
+  display: flex;
+  align-items: center;
+  gap: 3em;
+  margin-bottom: 6px;
+  min-height: 20px;
+  line-height: 1.4;
+}
+
+.settings-label-row .settings-label {
+  margin: 0;
+  display: inline;
+}
+
+.settings-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+.settings-inline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+}
+
+.settings-inline-status--on {
+  color: #16a34a;
+  font-weight: 500;
+  background: #dcfce7;
+}
+
+.settings-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.settings-status-dot--on {
+  background: #22c55e;
 }
 
 .settings-modal h3 {
@@ -195,6 +255,27 @@ body {
   font-size: 13px;
   color: #6b7280;
   margin: 0 0 16px;
+}
+
+.settings-llm-radio {
+  display: flex;
+  gap: 20px;
+  margin: 8px 0 12px;
+}
+
+.settings-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.settings-radio-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4f46e5;
 }
 
 .settings-desc a {

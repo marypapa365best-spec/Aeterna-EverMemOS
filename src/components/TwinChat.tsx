@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { chatWithGeminiDirect, getStoredGeminiApiKey, getStoredOpenAIApiKey, postChat, fetchMemoriesForContext, getSkillPrompt } from "../api/twinApi";
+import { chatWithGeminiDirect, getEffectiveLlmApiKey, getStoredLlmProvider, postChat, fetchMemoriesForContext, getSkillPrompt } from "../api/twinApi";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 
@@ -27,7 +27,7 @@ export const TwinChat: React.FC<TwinChatProps> = ({ twinId = DEFAULT_TWIN_ID, se
   const listRef = useRef<HTMLDivElement>(null);
   const [activeSkill, setActiveSkill] = useState<{ id: string; name: string; desc: string } | null>(null);
 
-  const hasKey = !!getStoredGeminiApiKey() || !!getStoredOpenAIApiKey();
+  const hasKey = !!getEffectiveLlmApiKey();
   const isAwakened = sessionMemory !== null;
   const initialMessagesRef = useRef(initialMessages);
   initialMessagesRef.current = initialMessages;
@@ -97,10 +97,9 @@ export const TwinChat: React.FC<TwinChatProps> = ({ twinId = DEFAULT_TWIN_ID, se
       if (activeSkill?.id) {
         skillPromptVal = await getSkillPrompt(activeSkill.id);
       }
-      const openaiKey = getStoredOpenAIApiKey();
-      const geminiKey = getStoredGeminiApiKey();
+      const useOpenAI = getStoredLlmProvider() === "openai";
       let reply: string;
-      if (openaiKey) {
+      if (useOpenAI) {
         reply = (await postChat({
           message: text,
           twinId,
@@ -138,15 +137,14 @@ export const TwinChat: React.FC<TwinChatProps> = ({ twinId = DEFAULT_TWIN_ID, se
         <div className="twin-chat-header-right">
           <div className="twin-chat-status">
             <span className={`twin-chat-dot ${hasKey ? "online" : "offline"}`} />
-            {hasKey ? "已连接" : "未配置 API Key（OpenAI 或 Gemini）"}
+            {hasKey ? "已连接" : "未配置大模型 API Key（请在设置中二选一）"}
           </div>
         </div>
       </div>
       <div ref={listRef} className="twin-chat-list">
         {!readOnly && !hasKey && (
           <div className="twin-chat-placeholder">
-            请在右上角「设置」中填写 <strong>Gemini API Key</strong> 后即可与分身对话。<br />
-            本聊天直接连接 Google Gemini，无需启动后端。
+            请在右上角「设置」中选择 OpenAI 或 Gemini 并填写对应 API Key 后即可与分身对话。
           </div>
         )}
         {!readOnly && hasKey && !isAwakened && (
@@ -221,7 +219,7 @@ export const TwinChat: React.FC<TwinChatProps> = ({ twinId = DEFAULT_TWIN_ID, se
             rows={2}
             placeholder={
               !hasKey
-                ? "请先在设置中填写 Gemini API Key"
+                ? "请先在设置中选择大模型并填写 API Key"
                 : !isAwakened
                 ? "请先点击「⚡ 唤醒并连接」加载分身记忆…"
                 : "输入消息与分身对话…"
