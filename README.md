@@ -1,12 +1,13 @@
 # 数字永生
 
-**数字永生** — 个人数字分身向导。通过多关卡人格配置与记忆碎片，生成专属数字分身，并将配置与记忆同步到 **EverMemOS Cloud** 作为长期记忆，供进化聊天室、分身好友库等场景的对话与检索使用。
+**Aeterna（数字永生）** 的核心目标是：**帮用户把自己的人生阅历、人格与记忆系统性地留存在数字世界，实现一种“数字永生”的可能性。**  
 
 ---
 
 ## Project Introduction
 
-**Aeterna（数字永生）** 的核心目标是：**帮用户把自己的人生阅历、人格与记忆系统性地留存在数字世界，实现一种“数字永生”的可能性。**  
+通过多关卡人格配置与记忆碎片，生成专属数字分身，并将配置与记忆同步到 **EverMemOS Cloud** 作为长期记忆，供进化聊天室、分身好友库等场景的对话与检索使用。  
+*(Aeterna is a personal digital-twin experience built on EverMemOS, focusing on long-term personality and memory preservation.)*
 它围绕“人格塑形 → 记忆注入 → 云端保存 → 分身养成 → 对话与进化 → 数字纪念”几个阶段，拆成 **9 个功能板块**：
 
 - **1️⃣ 灵魂拷贝 6 关（Personality Wizard）**  
