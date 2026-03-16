@@ -178,16 +178,3 @@ Do not open `index.html` directly; the chat and save APIs need the backend.
 - **License:** See repository.
 
 ---
-
-## Quick reference for judges / deploy
-
-- **快速在线体验（推荐给评委）：**  
-  直接打开 `http://170.106.180.152:3001/` → 点击右上角 **设置** → 填入 EverMemOS API Key 以及 LLM API Key（可选择 OpenAI / Gemini）→ 保存后即可体验完整 Demo。  
-  *说明：该线上版本可能相对 GitHub 仓库略有滞后，一切功能与代码以 GitHub 上的最新版本为准。*
-
-- **本地开发体验（含前后端）：**  
-  在项目根目录执行：`npm install` → `npm run dev` → 浏览器打开 `http://localhost:5173` → 在应用内 **设置** 中配置 EverMemOS / LLM Key（如需）。
-
-- **生产/评审环境部署（单 Node 进程）：**  
-  `npm run build` → `npm run start`，然后访问 `http://服务器IP:3001`。  
-  更详细的云端部署（如腾讯云）说明可参考 `docs/` 目录或 GitHub 仓库中的补充文档。
