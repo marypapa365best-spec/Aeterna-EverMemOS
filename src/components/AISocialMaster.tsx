@@ -211,7 +211,7 @@ export const AISocialMaster: React.FC = () => {
   return (
     <div className="permissions-container aisocial-container">
       {/* LEVEL 1: Active Twin Selection Top Bar */}
-      <div className="aisocial-topbar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+      <div className="aisocial-topbar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
           <span style={{ fontSize: '28px' }}>🌐</span>
           <h1 className="analytics-title" style={{ margin: 0, fontSize: '24px', color: '#000000' }}>AI 社交</h1>
@@ -223,13 +223,13 @@ export const AISocialMaster: React.FC = () => {
           disabled={isSandboxActive}
           options={TWIN_OPTIONS}
         />
-        <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '12px' }}>
+        <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>
           * 当前使用的是你的唯一「数字永生分身」进行社交巡航
         </div>
       </div>
 
       {/* LEVEL 2: Sub Navigation */}
-      <div className="analytics-header" style={{ marginBottom: '24px' }}>
+      <div className="analytics-header" style={{ marginBottom: '16px' }}>
         <div className="aisocial-main-tabs" style={{ display: 'inline-flex', background: 'rgba(255, 255, 255, 0.1)', padding: '4px', borderRadius: '12px', gap: '4px', marginBottom: '16px' }}>
           <button
             className={`aisocial-tab-btn ${mainTab === 'radar' ? 'active' : ''}`}

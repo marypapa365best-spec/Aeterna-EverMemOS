@@ -8029,28 +8029,59 @@ body.theme-classic .radar-select option {
 }
 
 .dc-btn-ritual {
-  padding: 9px 18px;
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(135deg, #f472b6, #a855f7);
-  font-size: 13px;
-  font-weight: 700;
+  outline: none;
   cursor: pointer;
-  color: #ffffff;
+  border: none;
+  padding: 0.9rem 2rem;
+  margin: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.05rem;
+  position: relative;
+  display: inline-block;
+  border-radius: 500px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f472b6, #a855f7);
+  color: ghostwhite;
   box-shadow: 0 8px 18px rgba(168, 85, 247, 0.4);
-  transition: transform 0.15s, box-shadow 0.18s, filter 0.15s;
-  letter-spacing: 0.02em;
 }
 
-.dc-btn-ritual:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
-  box-shadow: 0 14px 24px rgba(168, 85, 247, 0.5);
+.dc-btn-ritual span {
+  position: relative;
+  z-index: 10;
+  transition: color 0.4s;
+}
+
+.dc-btn-ritual:hover:not(:disabled) span {
+  color: #000;
+}
+
+.dc-btn-ritual::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120%;
+  height: 100%;
+  left: -10%;
+  z-index: 0;
+  background: #000;
+  transform: skew(30deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.dc-btn-ritual:hover:not(:disabled)::before {
+  transform: translate3d(100%, 0, 0);
 }
 
 .dc-btn-ritual:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.dc-btn-ritual:disabled::before {
+  display: none;
 }
 
 .dc-message-row {
@@ -8092,7 +8123,7 @@ body.theme-classic .radar-select option {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 170px;
+  max-height: 320px;
   overflow-y: auto;
 }
 

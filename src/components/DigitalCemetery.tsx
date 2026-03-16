@@ -274,14 +274,14 @@ export const DigitalCemetery: React.FC = () => {
                 className="dc-btn-ritual"
                 onClick={() => appendRitual("drink")}
               >
-                🍺 和 TA 喝一杯
+                <span>🍺 和 TA 喝一杯</span>
               </button>
               <button
                 type="button"
                 className="dc-btn-ritual"
                 onClick={() => appendRitual("candle")}
               >
-                🕯️ 点一盏灯
+                <span>🕯️ 点一盏灯</span>
               </button>
             </div>
             <div className="dc-form-row">
@@ -303,7 +303,7 @@ export const DigitalCemetery: React.FC = () => {
                     setRitualMessage("");
                   }}
                 >
-                  发送
+                  <span>发送</span>
                 </button>
               </div>
             </div>

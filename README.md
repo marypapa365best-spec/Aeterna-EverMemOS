@@ -6,16 +6,66 @@
 
 ## Project Introduction
 
-**数字永生** is a **web application** for building and managing a personal digital twin:
+**Aeterna（数字永生）** 的核心目标是：**帮用户把自己的人生阅历、人格与记忆系统性地留存在数字世界，实现一种“数字永生”的可能性。**  
+它围绕“人格塑形 → 记忆注入 → 云端保存 → 分身养成 → 对话与进化 → 数字纪念”几个阶段，拆成 **9 个功能板块**：
 
-- **灵魂拷贝 (Soul Copy)** — Multi-level personality wizard: configure identity, values, life stages, and sync to EverMemOS as structured memory.
-- **记忆碎片 (Memory Vault)** — Import and store personal memories (text, files); sync to cloud for use in twin conversations.
-- **云端记忆 (Cloud Memory)** — Browse and search your EverMemOS memories in one place.
-- **分身养成中心 (Twin Growth Center)** — Dashboard, avatar, and brain-sync metrics for your twin.
-- **进化聊天室 (Evolution Chat)** — Chat with your twin; replies use EverMemOS memories and personality (OpenAI or Gemini).
-- **AI 社交 (AI Social)** — Social radar, red lines, and AI friends chat.
+- **1️⃣ 灵魂拷贝 6 关（Personality Wizard）**  
+  通过 6 个关卡，引导用户填入从基础信息、成长环境、创伤与高光、价值观、知识体系到潜意识的关键片段：  
+  - 每一关都可以随时「保存并同步到云端」，以 upsert 方式写入 EverMemOS（同一关卡始终只有一条最新记录）；  
+  - 这些结构化人格配置，构成数字分身“是谁”的主干。
 
-All twin-related memories are stored and retrieved via **EverMemOS Cloud** ([console.evermind.ai](https://console.evermind.ai)); no local EverMemOS binary is required.
+- **2️⃣ 记忆碎片（Memory Vault）**  
+  把散落在生活里的文本、文件、录音整理为“记忆胶囊”：  
+  - 支持直接输入文字、上传文件，将重要经历和灵感收集起来；  
+  - 首次【创建记忆碎片】仅存本地，确认后点击【上传云端】写入 EverMemOS 专属分组 `vault_twinId`；  
+  - 长文本会先通过 Gemini 提炼 3–5 条要点上传，本地仍保留原文；  
+  - 这些碎片既是聊天上下文，也是认知矩阵和进化阶段的核心依据。
+
+- **3️⃣ 云端记忆总览（Cloud Memory View）**  
+  面向评委/开发者的 EverMemOS 检视界面：  
+  - 按 `user_id` / `group_id` 维度查看云端记忆：  
+    - `group_id = twinId`：灵魂拷贝 6 关的人格配置；  
+    - `group_id = vault_twinId`：来自 Memory Vault 的记忆碎片要点。  
+  - 方便验证 upsert 是否生效、分组是否干净，为“数字人生档案”提供可审计视图。
+
+- **4️⃣ 分身养成中心（Twin Studio）**  
+  总控制台，用来综合查看和调整数字分身的状态：  
+  - 聚合展示：外貌配置、人设绑定、记忆碎片注入情况；  
+  - 提供三大指标：  
+    - **大脑同步率**：根据进化聊天室里的 👍 / 👎 反馈动态调整；  
+    - **认知维度矩阵**：基于灵魂拷贝 + Memory Vault + 聊天反馈，给出 6 维人格画像；  
+    - **进化里程碑**：综合人格完成度、记忆碎片数量和同步率，阶段性点亮“胚胎 → 初级镜像 → 默契伴侣 → 数字双生”。
+
+- **5️⃣ 能力工坊（Skill Workshop）**  
+  在“人格 + 记忆”的基础上，为分身挂载不同的能力模式：  
+  - 如【每日财经要闻】等技能，会为分身注入特定系统提示词，让对话在某些主题上更专业；  
+  - 每个技能可以预设推荐提问，引导用户快速进入该能力场景。
+
+- **6️⃣ 进化聊天室（Evolution Chat）**  
+  用户与数字分身的主聊天空间，是“数字永生”日常运作的大脑接口：  
+  - 点击【⚡ 唤醒并连接】后，一次性加载 6 关人格与记忆碎片到会话上下文；  
+  - 对每条回复进行 👍 / 👎 反馈，驱动【大脑同步率】和认知矩阵的微调，让分身越聊越像你；  
+  - 左侧【历史聊天】记录重要会话，形成数字人生的“对话时间线”。
+
+- **7️⃣ AI 社交巡航助手（AI Social Master）**  
+  把分身当作“社交副驾驶”的实验模块：  
+  - 使用分身当前画像与偏好，帮助用户扫描和梳理社交圈（Demo 中为模拟数据）；  
+  - 提示谁适合主动联络、如何开场、怎样维系关系，探索“数字分身替你观察社交场”的可能性。
+
+- **8️⃣ 未寄出的信（Unspoken Words）**  
+  为人生中“难以说出口的话”提供一个数字存放处：  
+  - 写给某人的未发信、告别信、和解信等，都可以在这里沉淀下来；  
+  - 这些情感记忆可以与人格和其他碎片一起构成更完整的数字人生背景。
+
+- **9️⃣ 数字墓地（Digital Cemetery）**  
+  让用户为自己设计一处「数字世界的安静角落」，延伸“数字永生”的概念到数字纪念：  
+  - 配置墓地风格、氛围标签、核心元素和墓志铭，预览多种场景；  
+  - 支持上传自定义的“场景 3”作为默认入口画面；  
+  - 右侧的祭扫互动（点灯、喝一杯、留言）为未来亲友保留一个可以前来“看你、想你”的数字纪念空间。
+
+通过这 9 个板块，Aeterna 提供了一条完整路径：  
+**从记录人格与记忆、到在 EverMemOS 中长期保存，再到让数字分身带着这些记忆与世界持续对话**——  
+帮助用户把“我是谁、我经历了什么、别人如何记住我”留在数字世界里，实现一种温柔而可控的“数字永生”。
 
 ---
 
