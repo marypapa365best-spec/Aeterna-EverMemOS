@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { personalityLevels } from "../config/personalityLevels";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { generateAvatarWithGemini } from "../api/twinApi";
@@ -214,11 +214,10 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
 
   // Soul Copy State (Linked to Personality Wizard Levels)
   const [selectedSouls] = useState<number[]>([1, 2, 3]);
-  const [soulKeywords, setSoulKeywords] = useState<Record<number, string>>({});
 
-  // 从 localStorage 读取灵魂关键词（含评委打开时 App 预填的 Demo 数据）；切到「灵魂注入」时刷新
-  useEffect(() => {
-    const next: Record<number, string> = {};
+  // 人格关键词墙：从 localStorage 读取每关完整关键词列表（Dashboard 用）
+  const keywordsWallData = useMemo(() => {
+    const out: Record<number, string[]> = {};
     [1, 2, 3, 4, 5, 6].forEach((level) => {
       try {
         const raw = localStorage.getItem(`twin_soul_level_${level}_keywords`);
@@ -227,7 +226,7 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
         const values: string[] = [];
         Object.values(data).forEach((v) => {
           if (typeof v === "string") {
-            const trimmed = v.trim();
+            const trimmed = (v as string).trim();
             if (trimmed) values.push(trimmed);
           } else if (Array.isArray(v)) {
             (v as unknown[]).forEach((item) => {
@@ -238,14 +237,12 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
             });
           }
         });
-        if (values.length > 0) {
-          next[level] = values.slice(0, 3).join(" / ");
-        }
+        if (values.length > 0) out[level] = values;
       } catch {
-        // ignore parse errors
+        // ignore
       }
     });
-    setSoulKeywords(next);
+    return out;
   }, [studioTab]);
 
   // Twin Specific Skills State
@@ -674,6 +671,31 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                   </div>
                 </div>
               </div>
+
+              {/* 人格关键词墙 */}
+              <div className="workshop-card keywords-wall-card" style={{ marginTop: "24px" }}>
+                <h3 className="card-title" style={{ marginBottom: "16px" }}>人格关键词墙 (Personality Keywords)</h3>
+                {Object.keys(keywordsWallData).length === 0 ? (
+                  <p className="keywords-wall-empty">在「灵魂注入」中完成各关卡后，关键词会在此汇总展示。</p>
+                ) : (
+                  <div className="keywords-wall-grid">
+                    {personalityLevels.map((level) => {
+                      const kw = keywordsWallData[level.id];
+                      if (!kw || kw.length === 0) return null;
+                      return (
+                        <div key={level.id} className="keywords-wall-group">
+                          <div className="keywords-wall-label">{level.stageName || `Level ${level.id}`}</div>
+                          <div className="keywords-wall-tags">
+                            {kw.map((w, i) => (
+                              <span key={i} className="keywords-wall-tag">{w}</span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -864,12 +886,7 @@ export const TwinStudio: React.FC<TwinStudioProps> = ({ onNavigateToWorkshop, on
                         className="soul-binding-item"
                         onClick={() => onNavigateToWizard?.(soul.id)}
                       >
-                        <div className="soul-bg-progress" style={{ width: `${completion}%` }} />
-                        {soulKeywords[soul.id] && (
-                          <div className="soul-keywords-wall">
-                            {soulKeywords[soul.id]}
-                          </div>
-                        )}
+                        <div className="soul-bg-progress" style={{ '--soul-progress': `${completion}%` } as React.CSSProperties} />
                         <div className="soul-binding-info">
                           <div className="soul-binding-info-main">
                             <h4>{soul.title}</h4>

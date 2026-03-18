@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import { getMemories, searchMemories, getStoredApiKey } from "../api/twinApi";
 
 interface CloudMemoryViewProps {
@@ -44,6 +44,44 @@ export const CloudMemoryView: React.FC<CloudMemoryViewProps> = ({ twinId }) => {
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
 
   const hasApiKey = !!getStoredApiKey();
+
+  const browserRef = useRef<HTMLDivElement>(null);
+  const [centerWidth, setCenterWidth] = useState(350);
+  const isDragging = useRef(false);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    const startX = e.clientX;
+    const startWidth = centerWidth;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!isDragging.current) return;
+      const browserEl = browserRef.current;
+      if (!browserEl) return;
+      const browserRect = browserEl.getBoundingClientRect();
+      const sidebarWidth = 260;
+      const minCenter = 200;
+      const minDetail = 200;
+      const maxCenter = browserRect.width - sidebarWidth - minDetail - 6;
+      const delta = ev.clientX - startX;
+      const newWidth = Math.max(minCenter, Math.min(maxCenter, startWidth + delta));
+      setCenterWidth(newWidth);
+    };
+
+    const onUp = () => {
+      isDragging.current = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [centerWidth]);
 
   const handleFetchCloud = async () => {
     setCloudError(null);
@@ -119,7 +157,11 @@ export const CloudMemoryView: React.FC<CloudMemoryViewProps> = ({ twinId }) => {
           这里汇总展示你在 EverMemOS Cloud 中的结构化长期记忆，所有分身都会从同一套记忆仓库中读取，只是组合和视角不同。
         </p>
       </div>
-      <div className="memory-browser">
+      <div
+        className="memory-browser"
+        ref={browserRef}
+        style={{ gridTemplateColumns: `260px ${centerWidth}px 6px 1fr` }}
+      >
       {/* Left: Navigation sidebar */}
       <aside className="memory-browser__sidebar">
         <div className="memory-browser__brand">云端记忆</div>
@@ -209,6 +251,12 @@ export const CloudMemoryView: React.FC<CloudMemoryViewProps> = ({ twinId }) => {
           ))}
         </div>
       </div>
+
+      {/* Resize handle */}
+      <div
+        className="memory-browser__resize-handle"
+        onMouseDown={handleResizeStart}
+      />
 
       {/* Right: Detail panel with sub-tabs */}
       <div className="memory-browser__detail">
