@@ -8057,6 +8057,2299 @@ body.theme-classic .radar-select option {
 }
 
 /* =========================================
+   回忆录 Memoir（血缘 / 社交 / 足迹）
+   ========================================= */
+
+.memoir-container {
+  width: 100%;
+  padding: 20px 24px 32px;
+  box-sizing: border-box;
+}
+
+.memoir-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(195, 198, 211, 0.45);
+}
+
+.memoir-title {
+  margin: 0 0 8px;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #1a1b21;
+  letter-spacing: -0.02em;
+}
+
+.memoir-subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #434751;
+  line-height: 1.65;
+  max-width: 720px;
+}
+
+.memoir-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.memoir-tab {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(195, 198, 211, 0.6);
+  background: #f9f9ff;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #434751;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.memoir-tab:hover {
+  border-color: rgba(42, 90, 168, 0.35);
+  color: #2a5aa8;
+  background: #f3f3fa;
+}
+
+.memoir-tab--active {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(135deg, #2a5aa8 0%, #4773c2 100%);
+  box-shadow: 0 8px 22px rgba(42, 90, 168, 0.28);
+}
+
+.memoir-panel {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  padding: 22px 24px 26px;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06);
+}
+
+.memoir-panel-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.memoir-panel-desc {
+  margin: 0 0 20px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.memoir-kin-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding: 20px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 65%),
+    linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border: 1px dashed rgba(199, 210, 254, 0.6);
+}
+
+.memoir-kin-center {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.memoir-kin-ring {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.memoir-kin-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4338ca;
+  background: rgba(238, 242, 255, 0.95);
+  border: 1px solid #c7d2fe;
+}
+
+.memoir-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.memoir-card,
+.memoir-social-node {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.memoir-card-row {
+  margin-bottom: 10px;
+}
+
+.memoir-card-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.memoir-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2a5aa8;
+  margin-bottom: 4px;
+}
+
+.memoir-input,
+.memoir-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-family: inherit;
+  color: #0f172a;
+  background: #fff;
+}
+
+.memoir-input:focus,
+.memoir-textarea:focus {
+  outline: none;
+  border-color: rgba(42, 90, 168, 0.55);
+  box-shadow: 0 0 0 3px rgba(42, 90, 168, 0.12);
+}
+
+.memoir-input--inline {
+  margin-bottom: 8px;
+}
+
+.memoir-input--short {
+  max-width: 120px;
+}
+
+.memoir-input--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.memoir-input--readonly {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: default;
+  border-color: #e2e8f0;
+}
+
+.memoir-input--readonly:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #e2e8f0;
+}
+
+.memoir-social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.memoir-panel--social {
+  padding-bottom: 28px;
+}
+
+.memoir-social-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .memoir-social-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .memoir-social-plane-card {
+    flex: 1.15;
+    min-width: 0;
+  }
+
+  .memoir-social-side {
+    flex: 0.95;
+    min-width: 280px;
+    max-width: 400px;
+  }
+}
+
+.memoir-social-plane-card {
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(165deg, #f8fafc 0%, #fff 55%);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.memoir-social-plane-root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px;
+}
+
+.memoir-social-plane-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.memoir-social-plane-ctrl {
+  min-width: 36px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.memoir-social-plane-ctrl:hover {
+  border-color: rgba(42, 90, 168, 0.45);
+  color: #2a5aa8;
+  background: #f8fafc;
+}
+
+.memoir-social-plane-ctrl--text {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: auto;
+  padding: 0 14px;
+}
+
+.memoir-social-plane-ctrl--danger {
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+.memoir-social-plane-ctrl--danger:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.memoir-social-plane-ctrl--primary {
+  color: #2a5aa8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+.memoir-social-plane-ctrl--primary:hover {
+  background: #dbeafe;
+  border-color: #2a5aa8;
+  color: #1e3a8a;
+}
+
+.memoir-social-plane-toolbar-divider {
+  display: inline-block;
+  width: 1px;
+  height: 22px;
+  background: #e2e8f0;
+  margin: 0 2px;
+}
+
+.memoir-social-plane-viewport {
+  position: relative;
+  height: min(104vh, 880px);
+  min-height: 640px;
+  border-radius: 12px;
+  background: #e8eef5;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.memoir-social-plane-viewport:active {
+  cursor: grabbing;
+}
+
+.memoir-social-plane-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.memoir-social-plane-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.memoir-social-plane-bg {
+  fill: rgba(255, 255, 255, 0.72);
+  stroke: rgba(203, 213, 225, 0.65);
+  stroke-width: 1;
+}
+
+.memoir-social-edge-line {
+  stroke: rgba(42, 90, 168, 0.42);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.memoir-social-edge-group--active .memoir-social-edge-line {
+  stroke: rgba(220, 38, 38, 0.92);
+  stroke-width: 4;
+}
+
+.memoir-social-edge-line--rubber {
+  stroke: rgba(42, 90, 168, 0.75);
+  stroke-dasharray: 8 6;
+  stroke-width: 2.5;
+  pointer-events: none;
+}
+
+.memoir-social-edge-label-bg {
+  fill: rgba(255, 255, 255, 0.94);
+  stroke: rgba(42, 90, 168, 0.2);
+  stroke-width: 1;
+}
+
+.memoir-social-edge-group--active .memoir-social-edge-label-bg {
+  fill: rgba(254, 226, 226, 0.95);
+  stroke: rgba(220, 38, 38, 0.25);
+}
+
+.memoir-social-edge-label-text {
+  font-family: "Inter", "Noto Sans SC", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #334155;
+  pointer-events: none;
+}
+
+.memoir-social-edge-group--active .memoir-social-edge-label-text {
+  fill: #b91c1c;
+  font-weight: 900;
+}
+
+.memoir-social-plane-node {
+  position: absolute;
+  box-sizing: border-box;
+  touch-action: none;
+  z-index: 2;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* 整张圆：圈内任意位置可选中、拖移节点 */
+.memoir-social-plane-node-disk {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 2;
+  border: none;
+  overflow: hidden;
+  background: linear-gradient(160deg, #fff 0%, #f1f5f9 100%);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  transition: box-shadow 0.15s ease;
+}
+
+.memoir-social-plane-node-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.memoir-social-plane-node-disk:active {
+  cursor: grabbing;
+}
+
+.memoir-social-plane-node--self .memoir-social-plane-node-disk {
+  background: linear-gradient(155deg, #2a5aa8 0%, #4773c2 100%);
+  box-shadow: 0 8px 22px rgba(42, 90, 168, 0.35);
+}
+
+.memoir-social-plane-node--selected .memoir-social-plane-node-disk {
+  box-shadow: 0 0 0 3px rgba(42, 90, 168, 0.32), 0 8px 20px rgba(42, 90, 168, 0.14);
+}
+
+.memoir-social-plane-node--link-target .memoir-social-plane-node-disk {
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.45), 0 8px 20px rgba(34, 197, 94, 0.12);
+}
+
+/* 外圈 SVG：仅 stroke 命中；svg 本身不挡圆内指针 */
+.memoir-social-plane-node-rim-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.memoir-social-plane-node-rim-stroke {
+  stroke: rgba(42, 90, 168, 0.55);
+  cursor: alias;
+  transition: stroke 0.12s ease;
+}
+
+.memoir-social-plane-node-rim-stroke--self {
+  stroke: rgba(255, 255, 255, 0.65);
+}
+
+.memoir-social-plane-node--rim-engaged .memoir-social-plane-node-rim-stroke {
+  stroke: rgba(42, 90, 168, 0.95);
+}
+
+.memoir-social-plane-node--self.memoir-social-plane-node--rim-engaged .memoir-social-plane-node-rim-stroke {
+  stroke: rgba(255, 255, 255, 0.98);
+}
+
+.memoir-social-plane-node-rim-stroke--target {
+  stroke: rgba(34, 197, 94, 0.95);
+}
+
+.memoir-social-plane-node-inner {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2a5aa8;
+  line-height: 1;
+  user-select: none;
+}
+
+.memoir-social-plane-node--self .memoir-social-plane-node-inner {
+  color: #fff;
+}
+
+.memoir-social-plane-node-name {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  pointer-events: none;
+  user-select: none;
+}
+
+.memoir-social-plane-node--self .memoir-social-plane-node-name {
+  color: #1e3a5f;
+  font-weight: 700;
+}
+
+.memoir-social-plane-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.memoir-social-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.memoir-social-toolbar-hint {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+  flex: 1;
+  min-width: 160px;
+}
+
+.memoir-social-clear-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.memoir-social-clear-btn:hover {
+  background: #fef2f2;
+}
+
+.memoir-social-side-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.memoir-social-detail-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.memoir-social-detail .memoir-social-detail-title:not(:first-child) {
+  margin-top: 20px;
+}
+
+.memoir-social-edge-hint {
+  margin: -4px 0 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.memoir-social-edge-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memoir-social-edge-list-empty {
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 8px 0;
+}
+
+.memoir-social-edge-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.memoir-social-edge-item--active {
+  border-color: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 1px 8px rgba(220, 38, 38, 0.12);
+}
+
+.memoir-social-edge-item--active .memoir-social-edge-peer-mark-core {
+  background: linear-gradient(155deg, #ef4444 0%, #b91c1c 48%, #7f1d1d 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.98),
+    0 0 0 3px rgba(220, 38, 38, 0.18),
+    0 2px 6px rgba(220, 38, 38, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.memoir-social-edge-item--active .memoir-social-edge-peer-beam {
+  background: linear-gradient(
+    90deg,
+    rgba(220, 38, 38, 0.6) 0%,
+    rgba(220, 38, 38, 0.24) 42%,
+    rgba(239, 68, 68, 0.35) 88%,
+    rgba(239, 68, 68, 0.08) 100%
+  );
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.18);
+}
+
+.memoir-social-edge-item--active .memoir-social-edge-peer-beam::after {
+  background: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.memoir-social-edge-item--active .memoir-social-edge-peer-name {
+  color: #991b1b;
+  border-color: rgba(220, 38, 38, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(254, 226, 226, 0.55) 100%);
+}
+
+.memoir-social-edge-peer {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 108px;
+  gap: 0;
+}
+
+/* 图谱节点：外环 + 渐变核心 */
+.memoir-social-edge-peer-mark {
+  position: relative;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.memoir-social-edge-peer-mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.55) 0%,
+    transparent 55%
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.memoir-social-edge-peer-mark-core {
+  position: relative;
+  z-index: 1;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: linear-gradient(155deg, #6b9fe0 0%, #2a5aa8 48%, #234a8c 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.98),
+    0 0 0 3px rgba(42, 90, 168, 0.18),
+    0 2px 6px rgba(42, 90, 168, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+/* 连接线：渐变光束 + 末端微光 */
+.memoir-social-edge-peer-beam {
+  flex: 1 1 22px;
+  min-width: 18px;
+  max-width: 72px;
+  height: 3px;
+  margin: 0 10px 0 8px;
+  align-self: center;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 90, 168, 0.55) 0%,
+    rgba(42, 90, 168, 0.22) 42%,
+    rgba(148, 163, 184, 0.35) 88%,
+    rgba(148, 163, 184, 0.08) 100%
+  );
+  box-shadow: 0 0 10px rgba(42, 90, 168, 0.12);
+  position: relative;
+}
+
+.memoir-social-edge-peer-beam::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(42, 90, 168, 0.35);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+/* 对端名称：轻量胶囊标签 */
+.memoir-social-edge-peer-name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 152px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff 0%, #f1f5f9 100%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.memoir-input--edge-relation {
+  flex: 1 1 120px;
+  min-width: 100px;
+  max-width: 200px;
+}
+
+.memoir-btn-ghost--compact {
+  margin-top: 0;
+  padding: 4px 10px;
+  font-size: 10px;
+}
+
+.memoir-social-add-edge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memoir-select-social {
+  cursor: pointer;
+}
+
+.memoir-btn-primary--block {
+  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.memoir-social-self-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.memoir-social-save-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 4px;
+}
+
+.memoir-social-save-row .memoir-btn-ghost {
+  margin-top: 0;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.memoir-social-save-row--edges {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.memoir-btn-primary--social-save {
+  padding: 8px 18px;
+  font-size: 12px;
+  box-shadow: 0 4px 14px rgba(42, 90, 168, 0.22);
+}
+
+.memoir-btn-primary--social-save:hover:not(:disabled) {
+  box-shadow: 0 6px 18px rgba(42, 90, 168, 0.3);
+}
+
+.memoir-btn-primary--social-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.memoir-social-save-ok {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  letter-spacing: -0.01em;
+}
+
+.memoir-social-avatar-row .memoir-label {
+  margin-bottom: 6px;
+}
+
+.memoir-social-avatar-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.memoir-social-avatar-row-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.memoir-social-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.memoir-social-detail-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid rgba(42, 90, 168, 0.28);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  flex-shrink: 0;
+}
+
+.memoir-social-detail-avatar--self {
+  border-color: rgba(42, 90, 168, 0.55);
+  box-shadow: 0 0 0 2px rgba(42, 90, 168, 0.15), 0 6px 16px rgba(42, 90, 168, 0.2);
+}
+
+.memoir-social-detail-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.memoir-social-detail-avatar-letter {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #2a5aa8;
+}
+
+.memoir-social-detail-avatar--self .memoir-social-detail-avatar-letter {
+  color: #1e3a5f;
+}
+
+.memoir-social-avatar-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.memoir-btn-outline {
+  box-sizing: border-box;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(42, 90, 168, 0.4);
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #2a5aa8;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  vertical-align: middle;
+}
+
+button.memoir-btn-outline {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.memoir-btn-outline:hover {
+  border-color: rgba(42, 90, 168, 0.6);
+  background: #f8fafc;
+}
+
+/* 与「上传图片」同尺寸的次要操作（如恢复首字） */
+.memoir-btn-outline--secondary {
+  border-color: rgba(148, 163, 184, 0.9);
+  color: #64748b;
+}
+
+.memoir-btn-outline--secondary:hover {
+  border-color: #fecaca;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.memoir-social-avatar-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.memoir-social-link-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.memoir-social-link-modal {
+  width: 100%;
+  max-width: 380px;
+  padding: 22px 24px 18px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+}
+
+.memoir-social-link-modal-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.memoir-social-link-modal-meta {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.memoir-social-link-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.memoir-social-link-modal-hint {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.memoir-btn-primary {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2a5aa8 0%, #4773c2 100%);
+  box-shadow: 0 8px 20px rgba(42, 90, 168, 0.28);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.memoir-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(42, 90, 168, 0.35);
+}
+
+.memoir-btn-ghost {
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.memoir-btn-ghost:hover {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.memoir-timeline {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  position: relative;
+}
+
+.memoir-timeline::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, #c7d2fe, #e2e8f0);
+  border-radius: 2px;
+}
+
+.memoir-timeline-item {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 18px;
+  cursor: grab;
+  border-radius: 12px;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+.memoir-timeline-item--dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+}
+
+.memoir-timeline-item--drag-over {
+  box-shadow: 0 -3px 0 0 #3b82f6;
+}
+
+
+.memoir-timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.memoir-timeline-dot {
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.memoir-timeline-body {
+  position: relative;
+  padding: 12px 14px 12px 36px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.memoir-foot-drag-handle {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 36px;
+  border-radius: 8px;
+  color: #94a3b8;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  cursor: grab;
+  user-select: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.memoir-foot-drag-handle:hover {
+  color: #6366f1;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.memoir-timeline-item--dragging .memoir-foot-drag-handle {
+  cursor: grabbing;
+  color: #6366f1;
+  background: #eef2ff;
+  border-color: #a5b4fc;
+}
+
+.memoir-timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .memoir-container {
+    padding: 16px 14px 24px;
+  }
+
+  .memoir-tabs {
+    flex-direction: column;
+  }
+
+  .memoir-tab {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* 回忆录 · 数字档案馆（血缘画布） */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.memoir-kinship-archivist-wrap {
+  width: 100%;
+}
+
+.memoir-lineage-hero {
+  text-align: center;
+  margin-bottom: 28px;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.memoir-lineage-hero-title {
+  margin: 0 0 10px;
+  font-family: "Newsreader", "Manrope", serif;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 800;
+  color: #163422;
+  letter-spacing: -0.03em;
+}
+
+.memoir-lineage-hero-desc {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #424843;
+}
+
+.archivist-detail-panel {
+  margin-top: 20px;
+  padding: 0 4px 8px;
+}
+
+.archivist-detail-title {
+  margin: 0 0 12px;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--arch-primary, #163422);
+}
+
+.archivist-detail-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--arch-on-variant, #424843);
+  opacity: 0.85;
+}
+
+.archivist-detail-meta {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--arch-secondary, #77574d);
+}
+
+.archivist-detail-meta strong {
+  color: var(--arch-primary, #163422);
+}
+
+.archivist-detail-parent {
+  margin-left: 6px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.archivist-detail-relation-chain {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(22, 52, 34, 0.06);
+  border: 1px solid rgba(22, 52, 34, 0.1);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--arch-primary, #163422);
+}
+
+.archivist-detail-relation-chain-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--arch-secondary, #77574d);
+}
+
+.archivist-detail-relation-chain-value {
+  display: block;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.archivist-detail-hint {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--arch-on-variant, #424843);
+  opacity: 0.88;
+}
+
+.archivist-connections-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(194, 200, 192, 0.45);
+}
+
+.archivist-connections-title {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--arch-primary, #163422);
+  text-transform: uppercase;
+}
+
+.archivist-connections-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--arch-on-variant, #424843);
+  opacity: 0.75;
+  line-height: 1.5;
+}
+
+.archivist-connections-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.archivist-connections-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(200, 235, 208, 0.18);
+  border: 1px solid rgba(194, 200, 192, 0.35);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.archivist-connections-item:hover {
+  background: rgba(200, 235, 208, 0.45);
+  border-color: rgba(22, 52, 34, 0.22);
+}
+
+.archivist-connections-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6aad7e;
+  flex-shrink: 0;
+}
+
+.archivist-connections-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--arch-primary, #163422);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archivist-connections-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #6aad7e;
+  border-radius: 999px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.archivist-node-save-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.archivist-btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.archivist-btn-remove {
+  margin-top: 0 !important;
+}
+
+.archivist-btn-text {
+  margin-top: 14px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ba1a1a;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.archivist-btn-text:hover {
+  color: #93000a;
+}
+
+/* 非删除类文字按钮（如「恢复为首字」） */
+.archivist-btn-text--inline {
+  margin-top: 8px;
+  display: inline-block;
+  color: var(--arch-secondary, #77574d);
+  font-size: 11px;
+}
+
+.archivist-btn-text--inline:hover {
+  color: var(--arch-primary, #163422);
+}
+
+.archivist-avatar-row .memoir-label {
+  margin-bottom: 8px;
+}
+
+.archivist-avatar-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.archivist-avatar-row-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.archivist-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.archivist-detail-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(194, 200, 192, 0.65);
+  box-shadow: 0 4px 14px rgba(28, 28, 23, 0.06);
+  flex-shrink: 0;
+}
+
+.archivist-detail-avatar--self {
+  outline: 3px solid #c8ebd0;
+}
+
+.archivist-detail-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.archivist-detail-avatar-letter {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--arch-primary, #163422);
+}
+
+.archivist-detail-avatar--self .archivist-detail-avatar-letter {
+  font-size: 1.85rem;
+}
+
+.archivist-avatar-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.archivist-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 52, 34, 0.22);
+  background: rgba(200, 235, 208, 0.35);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--arch-primary, #163422);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.archivist-btn-secondary:hover {
+  background: #fff;
+  border-color: rgba(22, 52, 34, 0.38);
+}
+
+.archivist-field-hint--avatar {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.archivist-root {
+  /* Material lineage / Archivist（与参考 Tailwind 色板一致） */
+  --arch-bg: #fcf9f0;
+  --arch-bg-mid: #f6f3ea;
+  --arch-surface-container: #f1eee5;
+  --arch-surface-container-highest: #e5e2da;
+  --arch-primary: #163422;
+  --arch-primary-bright: #2d4b37;
+  --arch-primary-container: #2d4b37;
+  --arch-on-primary-container: #99baa1;
+  --arch-primary-fixed: #c8ebd0;
+  --arch-primary-fixed-dim: #adcfb4;
+  --arch-secondary: #77574d;
+  --arch-outline: #2d4b37;
+  --arch-outline-variant: #c2c8c0;
+  --arch-surface-high: #ebe8df;
+  --arch-surface: #fcf9f0;
+  --arch-on-surface: #1c1c17;
+  --arch-on-variant: #424843;
+  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--arch-on-surface);
+  background: var(--arch-bg);
+  border: 1px solid rgba(194, 200, 192, 0.45);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(28, 28, 23, 0.06);
+  position: relative;
+}
+
+.archivist-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(252, 249, 240, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(194, 200, 192, 0.35);
+  box-shadow: inset 0 -1px 0 0 rgba(28, 28, 23, 0.04);
+}
+
+.archivist-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.archivist-brand-icon {
+  font-size: 22px;
+  color: var(--arch-primary-bright, #2d4b37);
+  line-height: 1;
+}
+
+.archivist-brand-title {
+  margin: 0;
+  font-family: "Newsreader", "Manrope", serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--arch-primary-bright);
+  letter-spacing: -0.02em;
+}
+
+.archivist-brand-sub {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--arch-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.archivist-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 420px;
+}
+
+.archivist-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--arch-secondary);
+  pointer-events: none;
+}
+
+.archivist-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px 10px 38px;
+  border: none;
+  border-radius: 999px;
+  background: var(--arch-surface-container-highest);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: var(--arch-on-variant);
+}
+
+.archivist-search:focus {
+  outline: 2px solid rgba(22, 52, 34, 0.22);
+  outline-offset: 0;
+}
+
+.archivist-main {
+  display: grid;
+  grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
+  gap: 0;
+  min-height: 760px;
+}
+
+@media (max-width: 960px) {
+  .archivist-main {
+    grid-template-columns: 1fr;
+  }
+
+  .archivist-bento {
+    order: -1;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(194, 200, 192, 0.4);
+  }
+}
+
+.archivist-canvas-wrap {
+  position: relative;
+  min-height: 760px;
+}
+
+.archivist-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(241, 238, 229, 0.92);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(28, 28, 23, 0.06);
+  border: 1px solid rgba(194, 200, 192, 0.35);
+}
+
+.archivist-ctrl-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--arch-primary-bright);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+
+.archivist-ctrl-btn:hover {
+  background: var(--arch-bg-mid);
+}
+
+.archivist-member-count {
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  z-index: 6;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--arch-primary-bright, #2d4b37);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+.archivist-ctrl-btn:active {
+  transform: scale(0.96);
+}
+
+.archivist-ctrl-divider {
+  height: 1px;
+  margin: 2px 6px;
+  background: rgba(194, 200, 192, 0.55);
+}
+
+.archivist-viewport {
+  width: 100%;
+  height: 760px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background: radial-gradient(circle at center, #fcf9f0 0%, #f6f3ea 100%);
+}
+
+.archivist-viewport:active {
+  cursor: grabbing;
+}
+
+.archivist-world {
+  position: relative;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.archivist-mesh-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.archivist-mesh-line {
+  fill: none;
+  stroke: var(--arch-outline);
+  stroke-width: 3.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.archivist-mesh-line--orthogonal {
+  stroke: var(--arch-outline);
+  stroke-width: 3.5;
+  stroke-linejoin: miter;
+  stroke-linecap: square;
+}
+
+/* 配偶连线：与直系血缘折线相同描边设置 */
+.archivist-mesh-line--spouse {
+  stroke: var(--arch-outline);
+  stroke-width: 3.5;
+  stroke-linejoin: miter;
+  stroke-linecap: square;
+}
+
+/* 辈分：同一条虚线上的节点为同一辈 */
+.archivist-tier-line {
+  stroke: #2d4b37;
+  stroke-width: 2;
+  stroke-dasharray: 10 9;
+  stroke-linecap: round;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.archivist-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+  z-index: 2;
+  user-select: none;
+  /* n.y 被用于 JSX 的 translate(-50%, -50%)：为了让”虚线刚好穿过节点中心”，
+     节点容器高度必须只围住头像，不要被 caption 标题影响中心点。 */
+  height: 84px;
+  width: 84px;
+  overflow: visible;
+}
+
+.archivist-node:active {
+  cursor: grabbing;
+}
+
+.archivist-node-avatar {
+  box-sizing: border-box;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--arch-primary-bright, #2d4b37);
+  background: #fff;
+  border: 2px solid rgba(45, 75, 55, 0.28);
+  box-shadow: 0 4px 14px rgba(22, 52, 34, 0.1);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, padding 0.2s;
+}
+
+.archivist-node-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.archivist-node:hover .archivist-node-avatar {
+  border-color: rgba(45, 75, 55, 0.45);
+  box-shadow: 0 6px 18px rgba(22, 52, 34, 0.16);
+}
+
+.archivist-node--self .archivist-node-avatar {
+  outline: 3px solid var(--arch-primary-fixed, #c8ebd0);
+  outline-offset: 2px;
+  box-shadow: 0 6px 20px rgba(22, 52, 34, 0.14);
+}
+
+.archivist-node--selected .archivist-node-avatar {
+  padding: 3px;
+  color: #fff;
+  background: var(--arch-primary-bright, #2d4b37);
+  border-color: var(--arch-primary-bright, #2d4b37);
+  box-shadow: 0 8px 22px rgba(22, 52, 34, 0.28);
+}
+
+@keyframes kin-match-pulse {
+  0%   { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.7); }
+  70%  { box-shadow: 0 0 0 22px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0); }
+}
+
+.archivist-node--match .archivist-node-avatar {
+  outline: 5px solid #ef4444;
+  outline-offset: 3px;
+  animation: kin-match-pulse 1.2s ease-out infinite;
+}
+
+.archivist-node--selected.archivist-node--self .archivist-node-avatar {
+  outline: 3px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 0;
+  box-shadow: 0 10px 28px rgba(22, 52, 34, 0.32);
+}
+
+.archivist-node-caption {
+  position: absolute;
+  top: 97px; /* 84(头像) + 13px 间距 */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0;
+  text-align: center;
+  width: 140px;
+  max-width: 140px;
+  white-space: nowrap;
+  padding: 5px 8px 6px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.archivist-node-name {
+  display: block;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--arch-primary-bright, #2d4b37);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+.archivist-node--self .archivist-node-name {
+  font-weight: 700;
+  color: var(--arch-primary-bright, #2d4b37);
+}
+
+.archivist-node--selected .archivist-node-caption {
+  background: var(--arch-primary-bright, #2d4b37);
+  box-shadow: 0 4px 14px rgba(22, 52, 34, 0.22);
+}
+
+.archivist-node--selected .archivist-node-name,
+.archivist-node--selected .archivist-node-lifespan {
+  color: #fff;
+}
+
+.archivist-node--selected.archivist-node--self .archivist-node-name {
+  color: #fff;
+}
+
+.archivist-node-rel {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arch-secondary);
+  margin-top: 2px;
+}
+
+/* 生辰 / 存在时间 */
+.archivist-node-lifespan {
+  display: block;
+  margin-top: 4px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  color: var(--arch-primary-bright, #2d4b37);
+  opacity: 0.88;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.archivist-node--selected .archivist-node-lifespan {
+  opacity: 1;
+}
+
+.archivist-input--lifespan {
+  font-variant-numeric: tabular-nums;
+}
+
+.archivist-field-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--arch-on-variant, #424843);
+  opacity: 0.85;
+}
+
+.memoir-select--archivist {
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.archivist-lifespan-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.archivist-lifespan-row .archivist-year-select {
+  width: auto;
+  flex: 1;
+}
+
+.archivist-lifespan-dash {
+  font-size: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.memoir-select--archivist:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.archivist-bento {
+  padding: 20px;
+  background: rgba(241, 238, 229, 0.95);
+  backdrop-filter: blur(8px);
+  border-right: 1px solid rgba(194, 200, 192, 0.4);
+  overflow-y: auto;
+}
+
+.archivist-side-member-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.archivist-side-member-panel .archivist-detail-title {
+  margin: 0 0 12px;
+}
+
+.archivist-side-member-panel .memoir-card--detail {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.archivist-bento-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.archivist-bento-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--arch-primary-container);
+  color: var(--arch-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.archivist-bento-title {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--arch-primary);
+}
+
+.archivist-bento-meta {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--arch-secondary);
+}
+
+.archivist-bento-stat {
+  background: #fff;
+  border: 1px solid rgba(194, 200, 192, 0.35);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.archivist-bento-label {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--arch-secondary);
+}
+
+.archivist-bento-num {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--arch-primary);
+}
+
+.archivist-bento-hint {
+  margin: 0 0 12px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--arch-on-variant);
+}
+
+.archivist-bento-relayout {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px dashed rgba(22, 52, 34, 0.3);
+  background: rgba(255, 255, 255, 0.75);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--arch-secondary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.archivist-bento-relayout:hover {
+  background: #fff;
+  border-color: rgba(22, 52, 34, 0.45);
+  color: var(--arch-primary);
+}
+
+.archivist-bento-clear {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(140, 72, 62, 0.42);
+  background: rgba(255, 250, 249, 0.92);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b3d36;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.archivist-bento-clear:hover {
+  background: #fff;
+  border-color: rgba(140, 72, 62, 0.58);
+  color: #4a2924;
+}
+
+.archivist-bottom-bar {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.archivist-bottom-bar-btn {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.archivist-bottom-bar-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(42, 90, 168, 0.4);
+  color: #2a5aa8;
+}
+
+.archivist-bottom-bar-btn--icon {
+  width: 44px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.archivist-bottom-bar-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.archivist-bottom-bar-btn--danger {
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+.archivist-bottom-bar-btn--danger:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.archivist-bottom-bar-btn--save {
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.archivist-bottom-bar-btn--save:hover {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #15803d;
+}
+
+.archivist-fab-wrap {
+  position: relative;
+  z-index: 6;
+}
+
+.archivist-add-menu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(28, 28, 23, 0.12);
+  border: 1px solid rgba(194, 200, 192, 0.5);
+}
+
+.archivist-add-menu-btn {
+  padding: 12px 20px;
+  min-width: 100px;
+  border: none;
+  border-radius: 10px;
+  background: var(--arch-bg-mid);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--arch-primary);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.archivist-add-menu-btn:hover {
+  background: var(--arch-primary-container);
+  color: #fff;
+}
+
+.archivist-add-menu-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  color: rgba(45, 75, 55, 0.55);
+}
+
+.archivist-add-menu-btn:disabled:hover {
+  background: var(--arch-bg-mid);
+  color: rgba(45, 75, 55, 0.55);
+}
+
+.archivist-fab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #163422 0%, #2d4b37 100%);
+  box-shadow: 0 12px 28px rgba(22, 52, 34, 0.32);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.archivist-fab span:first-child {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.archivist-fab-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.archivist-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 16px 34px rgba(22, 52, 34, 0.38);
+}
+
+.archivist-fab:active {
+  transform: scale(0.96);
+}
+
+.archivist-records-fold {
+  margin-top: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(114, 121, 114, 0.18);
+  background: #fffef8;
+  overflow: hidden;
+}
+
+.archivist-records-summary {
+  padding: 14px 18px;
+  font-family: "Newsreader", serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--arch-primary);
+  cursor: pointer;
+  list-style: none;
+  background: rgba(252, 249, 240, 0.9);
+}
+
+.archivist-records-summary::-webkit-details-marker {
+  display: none;
+}
+
+.archivist-records-fold[open] .archivist-records-summary {
+  border-bottom: 1px solid rgba(114, 121, 114, 0.12);
+}
+
+.memoir-card-list--archivist {
+  padding: 16px 18px 20px;
+  background: #f6f3ea;
+}
+
+.memoir-card--archivist {
+  border-color: rgba(194, 200, 192, 0.45);
+  background: #fff;
+}
+
+.memoir-label--archivist {
+  color: var(--arch-primary, #163422);
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.memoir-input--archivist,
+.memoir-textarea--archivist {
+  border-color: rgba(194, 200, 192, 0.65);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.memoir-input--archivist:focus,
+.memoir-textarea--archivist:focus {
+  border-color: rgba(22, 52, 34, 0.4);
+  box-shadow: 0 0 0 3px rgba(22, 52, 34, 0.1);
+}
+
+/* =========================================
    DIGITAL CEMETERY
    ========================================= */
 
@@ -9419,4 +11712,290 @@ body.theme-classic .radar-select option {
   background: rgba(30, 64, 175, 0.12);
   color: #1e40af !important;
   border: 1px solid rgba(30, 64, 175, 0.35);
+}
+
+/* ══════════════════════════════════════
+   人生足迹：左右两栏布局
+══════════════════════════════════════ */
+.memoir-foot-panel {
+  max-width: 100%;
+}
+
+.memoir-foot-body {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.memoir-foot-bottom-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.memoir-foot-animate-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.memoir-foot-sort-btn {
+  margin-top: 0;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.memoir-foot-action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.memoir-foot-action-row .memoir-btn-ghost {
+  margin-top: 0;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.memoir-foot-left {
+  flex: 0 0 420px;
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.memoir-foot-right {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 520px;
+}
+
+/* 地图容器 */
+.footprint-map-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.footprint-map-canvas {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+}
+
+/* 未配置 / 加载中 / 错误 占位区 */
+.footprint-map-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.footprint-map-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.footprint-map-placeholder-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.footprint-map-placeholder-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* API Key 输入表单 */
+.footprint-map-key-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.footprint-map-key-input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.footprint-map-key-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+.footprint-map-key-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+.footprint-map-error-msg {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+  max-width: 280px;
+}
+
+.footprint-map-reset-btn {
+  margin-top: 4px;
+}
+
+/* 加载动画 */
+.footprint-map-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: footprint-spin 0.8s linear infinite;
+}
+
+@keyframes footprint-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 地图底部栏 */
+.footprint-map-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.footprint-map-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footprint-map-footer-hint {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.footprint-map-play-btn {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.footprint-map-play-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.footprint-map-stop-btn {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #f1f5f9;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #fecaca;
+  transition: background 0.15s;
+}
+
+.footprint-map-stop-btn:hover {
+  background: #fef2f2;
+}
+
+.footprint-map-reset-link {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.footprint-map-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footprint-map-camera-toggle {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.footprint-map-camera-btn {
+  padding: 3px 10px;
+  font-size: 11px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: background 0.15s, color 0.15s;
+}
+
+.footprint-map-camera-btn--active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.footprint-map-reset-link:hover {
+  color: #64748b;
+}
+
+/* 窄屏折叠为上下布局 */
+@media (max-width: 860px) {
+  .memoir-foot-body {
+    flex-direction: column;
+  }
+  .memoir-foot-left {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+  }
+  .memoir-foot-right {
+    width: 100%;
+    min-height: 400px;
+  }
+  .footprint-map-panel {
+    min-height: 400px;
+  }
+  .footprint-map-canvas {
+    min-height: 340px;
+  }
 }

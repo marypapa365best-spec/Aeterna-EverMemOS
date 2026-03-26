@@ -6,11 +6,12 @@ import { CloudMemoryView } from "./components/CloudMemoryView";
 import { SkillWorkshop } from "./components/SkillWorkshop";
 import { AISocialMaster } from "./components/AISocialMaster";
 import { UnspokenWords } from "./components/UnspokenWords";
+import { Memoir } from "./components/Memoir";
 import { DigitalCemetery } from "./components/DigitalCemetery";
 import { TwinStudio } from "./components/TwinStudio";
 import { getStoredApiKey, setStoredApiKey, getStoredDisplayName, setStoredDisplayName, getStoredGeminiApiKey, setStoredGeminiApiKey, getStoredOpenAIApiKey, setStoredOpenAIApiKey, getStoredLlmProvider, setStoredLlmProvider, getEffectiveLlmApiKey, type LlmProvider, getDemoSoulConfig } from "./api/twinApi";
 
-type TabType = "studio" | "wizard" | "evo-chat" | "memory" | "cloud" | "skills" | "aisocial" | "unspoken" | "cemetery";
+type TabType = "studio" | "wizard" | "evo-chat" | "memory" | "cloud" | "skills" | "aisocial" | "unspoken" | "memoir" | "cemetery";
 
 export const App: React.FC = () => {
   const [tab, setTab] = useState<TabType>("studio");
@@ -279,6 +280,13 @@ export const App: React.FC = () => {
               <span className="tab__label">未尽之言</span>
             </button>
             <button
+              className={["tab", "tab--sidebar", tab === "memoir" ? "tab--active" : ""].filter(Boolean).join(" ")}
+              onClick={() => setTab("memoir")}
+            >
+              <span className="tab__icon">📔</span>
+              <span className="tab__label">回忆录</span>
+            </button>
+            <button
               className={["tab", "tab--sidebar", tab === "cemetery" ? "tab--active" : ""].filter(Boolean).join(" ")}
               onClick={() => setTab("cemetery")}
             >
@@ -305,6 +313,7 @@ export const App: React.FC = () => {
             )}
             {tab === "aisocial" && <AISocialMaster />}
             {tab === "unspoken" && <UnspokenWords />}
+            {tab === "memoir" && <Memoir />}
             {tab === "cemetery" && <DigitalCemetery />}
           </section>
         </div>

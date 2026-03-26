@@ -68,7 +68,8 @@ const LevelIndicator: React.FC<{
         </div>
         {personalityLevels.map((level) => {
           const isActive = level.id === current;
-          const isCompleted = level.id <= completedLevel && !isActive;
+          // 节点“点亮/彩色”只随当前阶段变化，避免从阶段2退回阶段1时阶段2仍保持点亮。
+          const isCompleted = level.id < current;
 
           return (
             <button
@@ -103,8 +104,9 @@ const LevelIndicator: React.FC<{
         </div>
         {personalityLevels.map((level) => {
           const isActive = level.id === current;
-          const isCompleted = level.id <= completedLevel && !isActive;
-          const isPastOrCurrent = level.id <= current;
+          // 同样仅随当前阶段变化，退回时不保留彩色“已完成”态
+          const isCompleted = level.id < current;
+          const isPastOrCurrent = level.id < current;
 
           return (
             <button
@@ -140,8 +142,10 @@ const LevelIndicator: React.FC<{
         </div>
         {personalityLevels.map((level) => {
           const isActive = level.id === current;
-          const isCompleted = level.id <= completedLevel && !isActive;
-          const isPastOrCurrent = level.id <= current;
+          // 极光深夜（aurora）主题的节点视觉点亮逻辑：只跟随“当前阶段”前进度，
+          // 当你从 2 退回到 1 时，阶段 2 节点应回到未点亮的基础黑色样式。
+          const isCompleted = level.id < current;
+          const isPastOrCompleted = level.id < current;
           return (
             <button
               key={level.id}
@@ -150,7 +154,7 @@ const LevelIndicator: React.FC<{
                 "level-node level-node--aurora",
                 isActive ? "level-node--active level-node--active-aurora" : "",
                 isCompleted ? "level-node--completed" : "",
-                isPastOrCurrent ? "level-node--lit-aurora" : ""
+                isPastOrCompleted ? "level-node--lit-aurora" : ""
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -176,8 +180,8 @@ const LevelIndicator: React.FC<{
         />
         {personalityLevels.map((level) => {
           const isActive = level.id === current;
-          const isCompleted = level.id <= completedLevel && !isActive;
-          const isPastOrCurrent = level.id <= current;
+          const isCompleted = level.id < current;
+          const isPastOrCurrent = level.id < current;
 
           return (
             <button
@@ -207,8 +211,8 @@ const LevelIndicator: React.FC<{
         <div className="level-indicator__line" aria-hidden />
         {personalityLevels.map((level) => {
           const isActive = level.id === current;
-          const isCompleted = level.id <= completedLevel && !isActive;
-          const isPastOrCurrent = level.id <= current;
+          const isCompleted = level.id < current;
+          const isPastOrCurrent = level.id < current;
 
           return (
             <button
