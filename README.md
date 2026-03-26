@@ -1,9 +1,9 @@
 # Aeterna（数字永生）
 
 > **TL;DR**
-> 1) Judge mode: open `http://170.106.180.152:3001/`, set EverMemOS + LLM keys in **设置**, and start exploring.  
-> 2) Local mode: run `npm install` + `npm run dev`, then open `http://localhost:5173`.  
-> 3) Production mode: run `npm run build` + `npm run start`, then open `http://<server-ip>:3001`.
+> 1) **评审模式 / Judge mode**：打开 `http://170.106.180.152:3001/`，在 **设置** 中填入 EverMemOS + LLM Key 后即可体验。  
+> 2) **本地模式 / Local mode**：执行 `npm install` + `npm run dev`，然后访问 `http://localhost:5173`。  
+> 3) **生产模式 / Production mode**：执行 `npm run build` + `npm run start`，然后访问 `http://<server-ip>:3001`。
 
 核心目标是：**帮用户把自己的人生阅历、人格与记忆系统性地留存在数字世界，实现一种“数字永生”的可能性。**  
 
