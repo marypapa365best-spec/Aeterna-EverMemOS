@@ -128,6 +128,7 @@ Edit `.env` and set:
 
 - `EVERMEMOS_API_KEY` — from [EverMemOS Console](https://console.evermind.ai/api-keys)
 - `OPENAI_API_KEY` or `GEMINI_API_KEY` — for Evolution Chat when not using the in-app Settings
+- `VITE_GOOGLE_MAPS_API_KEY` — optional default key for Memoir → Footprint map (useful for judge testing)
 
 You can leave them unset and configure keys in-app via **设置 (Settings)**.  
 Those keys are sent only to your own backend.

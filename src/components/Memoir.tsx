@@ -230,6 +230,7 @@ const S_STORAGE = "twin_memoir_social";
 const SOCIAL_GENDER_OPTIONS = ["男", "女", "其他"] as const;
 const F_STORAGE = "twin_memoir_footprint";
 const MAPS_KEY_STORAGE = "twin_memoir_maps_api_key";
+const DEFAULT_MAPS_API_KEY = String(import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? "AIzaSyBUZO69lnrdmdq02MG3pApLLHa2I0TVrh8").trim();
 const WIZARD_SYNCED_KEY = "twin_last_synced_form";
 
 const BIRTH_CITY_LABELS: Record<string, string> = {
@@ -666,9 +667,11 @@ export const Memoir: React.FC = () => {
   /** 血缘画布在「一键清空」等操作后触发重新居中 */
   const [kinViewReset, setKinViewReset] = useState(0);
 
-  const [mapsApiKey, setMapsApiKey] = useState<string>(() =>
-    window.localStorage.getItem(MAPS_KEY_STORAGE) ?? ""
-  );
+  const [mapsApiKey, setMapsApiKey] = useState<string>(() => {
+    const localKey = (window.localStorage.getItem(MAPS_KEY_STORAGE) ?? "").trim();
+    if (localKey) return localKey;
+    return DEFAULT_MAPS_API_KEY;
+  });
   const footPlayRef = useRef<(() => void) | null>(null);
   const [footAnimPlayed, setFootAnimPlayed] = useState(false);
 
