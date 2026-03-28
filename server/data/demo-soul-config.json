@@ -2,18 +2,18 @@
   "twinId": "demo-twin-001",
   "formState": {
     "1": {
-      "family_name": "陈",
-      "given_name": "小新",
+      "family_name": "朱",
+      "given_name": "富贵",
       "birth_date": "1988-08-08",
       "blood_type": "O",
       "birth_country": "CN",
       "birth_city": "chongqing",
       "gender": "male",
       "native_language": "zh-CN",
-      "father_family_name": "陈",
-      "father_given_name": "大明",
-      "mother_family_name": "李",
-      "mother_given_name": "秀华"
+      "father_family_name": "朱",
+      "father_given_name": "大鹏",
+      "mother_family_name": "杨",
+      "mother_given_name": "秀英"
     },
     "2": {
       "old_house_time_range": "1988-1997",

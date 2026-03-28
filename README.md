@@ -5,12 +5,19 @@
 > 2) **本地模式 / Local mode**：执行 `npm install` + `npm run dev`，然后访问 `http://localhost:5173`。  
 > 3) **生产模式 / Production mode**：执行 `npm run build` + `npm run start`，然后访问 `http://<server-ip>:3001`。
 
+**产品介绍视频 / Product intro (YouTube)** — 点击下方封面在 YouTube 打开：
+
+[![Aeterna 产品介绍 — 点击在 YouTube 观看](docs/assets/aeterna-product-intro-cover.jpg)](https://www.youtube.com/watch?v=Yk_AgzXPm50)
+
+链接（可复制）：[https://www.youtube.com/watch?v=Yk_AgzXPm50](https://www.youtube.com/watch?v=Yk_AgzXPm50)
+
 核心目标是：**帮用户把自己的人生阅历、人格与记忆系统性地留存在数字世界，实现一种“数字永生”的可能性。**  
 
 ---
 
 ## Quick Reference (Judges / Deploy)
 
+- **Product intro video** — [YouTube](https://www.youtube.com/watch?v=Yk_AgzXPm50)
 - **Online demo (recommended for judges)**  
   Open `http://170.106.180.152:3001/` → click **设置** (top-right) → fill in EverMemOS API Key + LLM API Key (OpenAI or Gemini) → save.
 - **Note**  
