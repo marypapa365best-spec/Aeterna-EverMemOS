@@ -230,7 +230,7 @@ const S_STORAGE = "twin_memoir_social";
 const SOCIAL_GENDER_OPTIONS = ["男", "女", "其他"] as const;
 const F_STORAGE = "twin_memoir_footprint";
 const MAPS_KEY_STORAGE = "twin_memoir_maps_api_key";
-const DEFAULT_MAPS_API_KEY = String(import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? "AIzaSyBUZO69lnrdmdq02MG3pApLLHa2I0TVrh8").trim();
+const DEFAULT_MAPS_API_KEY = String(import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? "").trim();
 const WIZARD_SYNCED_KEY = "twin_last_synced_form";
 
 const BIRTH_CITY_LABELS: Record<string, string> = {
